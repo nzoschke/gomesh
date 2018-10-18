@@ -1,0 +1,22 @@
+protoc:
+  version: 3.6.1
+
+create:
+  packages:
+    - directory: protos
+      name: omgrpc
+
+generate:
+  go_options:
+    import_path: github.com/nzoschke/omgrpc/protos
+
+  plugins:
+    - name: go
+      type: go
+      output: gen/go
+      flags: plugins=grpc
+
+lint:
+  rules:
+    remove:
+      - REQUEST_RESPONSE_TYPES_UNIQUE
