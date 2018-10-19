@@ -13,8 +13,8 @@ It demonstrates:
 | Component           | Via                    | Config, Code                      |
 |---------------------|------------------------|:---------------------------------:|
 | Service Definitions | Protocol Buffers       | [💾](protos/users/v1/users.proto) |
-| Services[2]         | gRPC, Go               | [💾](cmd/users-v1/main.go)        |
-| Clients[3]          | gRPC, Go               | [💾](cmd/users-v2/main.go)        |
+| [Services][2]       | gRPC, Go               | [💾](cmd/users-v1/main.go)        |
+| [Clients][3]        | gRPC, Go               | [💾](cmd/users-v2/main.go)        |
 | Service Discovery   | Envoy, Consul          | 🛠                                |
 | RPC                 | Envoy, gRPC            | 🛠                                |
 | Datastores          | Envoy, Mongo, Redis    | 🛠                                |
