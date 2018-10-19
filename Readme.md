@@ -10,18 +10,20 @@ With this foundation you can skip over all the setup, and focus entirely on your
 
 It demonstrates:
 
-| Component           | Via                    | Config, Code              |
-|---------------------|------------------------|:-------------------------:|
-| Service Definitions | Protocol Buffers       | 🛠                        |
-| Services[2]         | gRPC, Go               | [💾](cmd/users-v1/main.go)|
-| Service Discovery   | Envoy, Consul          | 🛠                        |
-| RPC                 | Envoy, gRPC            | 🛠                        |
-| Datastores          | Envoy, Mongo, Redis    | 🛠                        |
-| Rest API Gateway    | Envoy, Swagger         | 🛠                        |
-| GraphQL API Gateway | Rejoiner               | 🛠                        |
-| Observability       | Envoy, gRPC middleware | 🛠                        |
+| Component           | Via                    | Config, Code                      |
+|---------------------|------------------------|:---------------------------------:|
+| Service Definitions | Protocol Buffers       | [💾](protos/users/v1/users.proto) |
+| Services[2]         | gRPC, Go               | [💾](cmd/users-v1/main.go)        |
+| Clients[3]          | gRPC, Go               | [💾](cmd/users-v2/main.go)        |
+| Service Discovery   | Envoy, Consul          | 🛠                                |
+| RPC                 | Envoy, gRPC            | 🛠                                |
+| Datastores          | Envoy, Mongo, Redis    | 🛠                                |
+| Rest API Gateway    | Envoy, Swagger         | 🛠                                |
+| GraphQL API Gateway | Rejoiner               | 🛠                                |
+| Observability       | Envoy, gRPC middleware, Prometheus | 🛠                                |
 
 [2]: docs/grpc-service.md
+[3]: docs/grpc-client.md
 
 ## Quick Start
 
@@ -47,10 +49,10 @@ $ git clone https://github.com/nzoschke/omgrpc.git ~/dev/omgrpc
 $ cd ~/dev/omgrpc
 
 $ go run cmd/users-v1/main.go
-listening on :8080
+listening on :8000
 
 $ prototool grpc                    \
---address 0.0.0.0:8080              \
+--address 0.0.0.0:8000              \
 --method omgrpc.users.v1.Users/Get  \
 --data '{"name": "foo"}'
 
