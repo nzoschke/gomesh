@@ -24,12 +24,12 @@ func serve() error {
 	s := grpc.NewServer()
 	users.RegisterUsersServer(s, &Server{})
 
-	l, err := net.Listen("tcp", "0.0.0.0:8080")
+	l, err := net.Listen("tcp", "0.0.0.0:8000")
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("listening on :8080")
+	fmt.Println("listening on :8000!")
 	return s.Serve(l)
 }
 
