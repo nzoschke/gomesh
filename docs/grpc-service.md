@@ -24,7 +24,7 @@ $ prototool create protos/users/v1/users.proto
 
 Then we add `service`, `rpc` and `message` definitions for our service:
 
-```
+```proto
 syntax = "proto3";
 
 package omgrpc.users.v1;
@@ -71,9 +71,9 @@ $ echo $?
 0
 ```
 
-## Generating Client and Server Interfaces
+## Generating a Server Interfaces
 
-Next we create a `.go` file with a gRPC client and server interface. The `prototool generate` command, configured with a `prototool.yaml` creates this for us by invoking the `protoc` compiler with proper flags.
+Next we create a `.go` file with a gRPC server interface. The `prototool generate` command, configured with a `prototool.yaml` creates this for us by invoking the `protoc` compiler with proper flags.
 
 ```yaml
 generate:
@@ -112,12 +112,6 @@ type User struct {
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
-}
-
-// UsersClient is the client API for Users service.
-type UsersClient interface {
-	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*User, error)
-	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*User, error)
 }
 
 // UsersServer is the server API for Users service.
@@ -161,12 +155,12 @@ func serve() error {
 	s := grpc.NewServer()
 	users.RegisterUsersServer(s, &Server{})
 
-	l, err := net.Listen("tcp", "0.0.0.0:8080")
+	l, err := net.Listen("tcp", "0.0.0.0:8000")
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("listening on :8080")
+	fmt.Println("listening on :8000")
 	return s.Serve(l)
 }
 
@@ -199,10 +193,10 @@ Finally we can test our service. We run the server program, then use the `protot
 
 ```shell
 $ go run cmd/users-v1/main.go
-listening on :8080
+listening on :8000
 
 $ prototool grpc                      \
---address 0.0.0.0:8080                \
+--address 0.0.0.0:8000                \
 --method omgrpc.users.v1.Users/Create \
 --data '{
     "parent": "teams/myteam",
@@ -225,7 +219,7 @@ $ prototool grpc                      \
 
 ```shell
 $ prototool grpc                    \
---address 0.0.0.0:8080              \
+--address 0.0.0.0:8000              \
 --method omgrpc.users.v1.Users/Get  \
 --data '{"name": "foo"}'
 
