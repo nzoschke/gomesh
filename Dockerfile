@@ -1,6 +1,9 @@
 FROM golang:1.11
 
 WORKDIR /app
-COPY . .
 
+COPY go.* ./
+RUN go mod download
+
+COPY . .
 RUN go install ./...
