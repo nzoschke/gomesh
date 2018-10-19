@@ -1,0 +1,7 @@
+version: '3'
+services:
+  users-v1:
+    build: .
+    command: ["users-v1"]
+    ports:
+     - "8080:8080"
