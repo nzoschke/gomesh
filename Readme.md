@@ -20,7 +20,7 @@ It demonstrates:
 | Datastores          | Envoy, Mongo, Redis    | 🛠                                |
 | Rest API Gateway    | Envoy, Swagger         | 🛠                                |
 | GraphQL API Gateway | Rejoiner               | 🛠                                |
-| Observability       | Envoy, gRPC middleware, Prometheus | 🛠                                |
+| Observability       | Envoy, Prometheus      | 🛠                                |
 
 [2]: docs/grpc-service.md
 [3]: docs/grpc-client.md

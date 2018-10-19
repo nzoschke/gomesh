@@ -189,7 +189,7 @@ Note that for this example we're not persisting any User data.
 
 ## Testing
 
-Finally we can test our service. We run the server program, then use the `prototool grpc` command to translate JSON <-> gRPC requests and responses:
+Finally we can test our service. We run the server program, then use the `prototool grpc` command to translate JSON ⟷ gRPC requests and responses:
 
 ```shell
 $ go run cmd/users-v1/main.go

@@ -187,7 +187,7 @@ func (s *Server) Get(ctx context.Context, u *users.GetRequest) (*users.User, err
 
 ## Testing
 
-Finally we can test our service. We run the server programs, then use the `prototool grpc` command to translate JSON <-> gRPC requests and responses:
+Finally we can test our service. We run the server programs, then use the `prototool grpc` command to translate JSON ⟷ gRPC requests and responses:
 
 ```shell
 $ go run cmd/users-v2/main.go
