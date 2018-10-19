@@ -8,7 +8,7 @@ create:
 
 generate:
   go_options:
-    import_path: github.com/nzoschke/omgrpc/protos
+    import_path: github.com/nzoschke/omgrpc
 
   plugins:
     - name: go
