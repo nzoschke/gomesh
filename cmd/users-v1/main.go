@@ -41,7 +41,7 @@ func (s *Server) Create(ctx context.Context, u *users.CreateRequest) (*users.Use
 	return &users.User{
 		CreateTime:  ptypes.TimestampNow(),
 		DisplayName: u.User.DisplayName,
-		Id:          uuid.Must(uuid.NewV1()).String(),
+		Id:          uuid.NewV4().String(),
 		Name:        u.User.Name,
 		Parent:      u.Parent,
 	}, nil
