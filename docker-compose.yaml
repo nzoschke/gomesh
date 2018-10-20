@@ -1,15 +1,22 @@
 version: '3'
 services:
-  users-v1:
+  users-v2:
     build: .
-    command: ["users-v1"]
+    command: ["users-v2", "-w", "widgets-v1:8000"]
     ports:
-     - "8000:8000"
+     - "8000"
 
-  users-v1-envoy:
+  users-v2-envoy:
     build:
         context: .
         dockerfile: Dockerfile-envoy
-    command: ["envoy", "-c", "/etc/envoy/envoy.yaml"]
+    command: ["envoy", "-c", "/etc/envoy/sts.yaml"]
     ports:
       - "80:10000"
+      - "9901:9901"
+
+  widgets-v1:
+    build: .
+    command: ["widgets-v1"]
+    ports:
+     - "8000"
