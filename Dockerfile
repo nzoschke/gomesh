@@ -5,5 +5,6 @@ WORKDIR /app
 COPY go.* ./
 RUN go mod download
 
-COPY . .
+COPY cmd cmd
+COPY gen gen
 RUN go install ./...
