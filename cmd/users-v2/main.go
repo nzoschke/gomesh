@@ -31,7 +31,11 @@ func main() {
 }
 
 func serve(config config) error {
-	conn, err := grpc.Dial(config.WidgetsAddr, grpc.WithInsecure())
+	conn, err := grpc.Dial(
+		config.WidgetsAddr,
+		grpc.WithAuthority("widgets-v1"),
+		grpc.WithInsecure(),
+	)
 	if err != nil {
 		return err
 	}
