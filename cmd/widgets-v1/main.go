@@ -6,25 +6,35 @@ import (
 	"net"
 
 	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
+	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 )
 
+type config struct {
+	Port int `conf:"p" help:"Port to listen"`
+}
+
 func main() {
-	if err := serve(); err != nil {
+	config := config{
+		Port: 8000,
+	}
+	conf.Load(&config)
+
+	if err := serve(config); err != nil {
 		panic(err)
 	}
 }
 
-func serve() error {
+func serve(config config) error {
 	s := grpc.NewServer()
 	widgets.RegisterWidgetsServer(s, &Server{})
 
-	l, err := net.Listen("tcp", "0.0.0.0:8001")
+	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("listening on :8001!")
+	fmt.Printf("listening on :%d\n", config.Port)
 	return s.Serve(l)
 }
 

@@ -7,19 +7,31 @@ import (
 
 	users "github.com/nzoschke/omgrpc/gen/go/protos/users/v2"
 	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
+	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+type config struct {
+	Port        int    `conf:"p" help:"Port to listen"`
+	WidgetsAddr string `conf:"w" help:"Widgets service address to dial"`
+}
+
 func main() {
-	if err := serve(); err != nil {
+	config := config{
+		Port:        8000,
+		WidgetsAddr: "0.0.0.0:8001",
+	}
+	conf.Load(&config)
+
+	if err := serve(config); err != nil {
 		panic(err)
 	}
 }
 
-func serve() error {
-	conn, err := grpc.Dial("0.0.0.0:8001", grpc.WithInsecure())
+func serve(config config) error {
+	conn, err := grpc.Dial(config.WidgetsAddr, grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -31,12 +43,12 @@ func serve() error {
 		WidgetsClient: c,
 	})
 
-	l, err := net.Listen("tcp", "0.0.0.0:8000")
+	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("listening on :8000!")
+	fmt.Printf("listening on :%d\n", config.Port)
 	return s.Serve(l)
 }
 

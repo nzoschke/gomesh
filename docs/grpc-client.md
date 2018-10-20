@@ -193,7 +193,7 @@ Finally we can test our service. We run the server programs, then use the `proto
 $ go run cmd/users-v2/main.go
 listening on :8000
 
-$ go run cmd/widgets-v1/main.go
+$ go run cmd/widgets-v1/main.go -p 8001
 listening on :8001
 
 $ prototool grpc                      \
