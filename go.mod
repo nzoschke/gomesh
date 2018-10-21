@@ -2,6 +2,7 @@ module github.com/nzoschke/omgrpc
 
 require (
 	github.com/golang/protobuf v1.2.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/conf v1.0.0
 	github.com/segmentio/go-snakecase v1.0.0 // indirect
