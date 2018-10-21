@@ -8,6 +8,7 @@ import (
 	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type config struct {
@@ -28,6 +29,7 @@ func main() {
 func serve(config config) error {
 	s := grpc.NewServer()
 	widgets.RegisterWidgetsServer(s, &Server{})
+	reflection.Register(s)
 
 	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 	if err != nil {

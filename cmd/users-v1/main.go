@@ -11,6 +11,7 @@ import (
 	users "github.com/nzoschke/omgrpc/gen/go/protos/users/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -23,6 +24,7 @@ func main() {
 func serve() error {
 	s := grpc.NewServer()
 	users.RegisterUsersServer(s, &Server{})
+	reflection.Register(s)
 
 	l, err := net.Listen("tcp", "0.0.0.0:8000")
 	if err != nil {

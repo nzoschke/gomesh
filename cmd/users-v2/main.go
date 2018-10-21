@@ -10,6 +10,7 @@ import (
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -46,6 +47,7 @@ func serve(config config) error {
 	users.RegisterUsersServer(s, &Server{
 		WidgetsClient: c,
 	})
+	reflection.Register(s)
 
 	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
 	if err != nil {
