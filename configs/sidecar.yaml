@@ -37,6 +37,7 @@ static_resources:
                   grpc-message: "%RESP(grpc-message)%"
                   grpc-status-trailer: "%TRAILER(grpc-status)%"
                   grpc-message-trailer: "%TRAILER(grpc-message)%"
+                  overloaded: "%RESP(X-ENVOY-OVERLOADED)%"
           stat_prefix: ingress_http
           codec_type: AUTO
           route_config:
@@ -82,6 +83,7 @@ static_resources:
                   grpc-message: "%RESP(grpc-message)%"
                   grpc-status-trailer: "%TRAILER(grpc-status)%"
                   grpc-message-trailer: "%TRAILER(grpc-message)%"
+                  attempt-count: "%REQ(X-ENVOY-ATTEMPT-COUNT)%"
           stat_prefix: egress_http
           codec_type: AUTO
           route_config:
@@ -89,9 +91,15 @@ static_resources:
             virtual_hosts:
             - name: widgets-v1
               domains: ["widgets-v1"]
+              include_request_attempt_count: true
               routes:
-              - match: { prefix: "/" }
-                route: { cluster: widgets-v1 }
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: widgets-v1
+                  retry_policy:
+                    retry_on: unavailable
+                    num_retries: 5
           http_filters:
           - name: envoy.router
 
@@ -113,6 +121,9 @@ static_resources:
 
   - name: widgets-v1
     http2_protocol_options: {}
+    circuit_breakers:
+      thresholds:
+        - max_retries: 10
     connect_timeout: 0.25s
     type: STRICT_DNS
     lb_policy: ROUND_ROBIN
