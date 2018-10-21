@@ -17,12 +17,12 @@ It demonstrates:
 | [Clients][3]         | gRPC, Go                           | [💾](cmd/users-v2/main.go)        |
 | [Service Proxy][4]   | Envoy, gRPC                        | [⚙️](configs/sidecar.yaml)        |
 | [Observability][5]   | Envoy, gRPC middleware, Prometheus | [⚙️](configs/prometheus.yml)      |
-| [Fault tolerance][6] | Envoy                              | 🛠                                |
+| [Fault tolerance][6] | Envoy, gRPC middleware             | 🛠                                |
+| Rate Limiting        | Envoy, Redis                       | 🛠                                |
 | Service Discovery    | Envoy, Consul                      | 🛠                                |
 | Datastores           | Envoy, Mongo, Redis                | 🛠                                |
 | REST API Gateway     | Envoy, Swagger                     | 🛠                                |
 | GraphQL API Gateway  | Rejoiner                           | 🛠                                |
-| Rate Limiting        | Envoy, Redis                       | 🛠                                |
 
 [2]: docs/grpc-service.md
 [3]: docs/grpc-client.md
