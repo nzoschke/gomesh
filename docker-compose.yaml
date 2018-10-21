@@ -16,3 +16,10 @@ services:
   widgets-v1:
     build: .
     command: ["widgets-v1"]
+
+  prometheus:
+    build:
+        context: .
+        dockerfile: Dockerfile-prometheus
+    ports:
+      - "9090:9090"
