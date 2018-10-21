@@ -4,7 +4,7 @@ services:
     build:
         context: .
         dockerfile: Dockerfile-envoy
-    command: ["envoy", "-c", "/etc/envoy/sidecar.yaml", "-l", "trace"]
+    command: ["envoy", "-c", "/etc/envoy/sidecar.yaml"]
     ports:
       - "80:9000"   # expose ingress
       - "9901:9901" # expose admin
