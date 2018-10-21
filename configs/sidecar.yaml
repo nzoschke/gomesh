@@ -16,6 +16,27 @@ static_resources:
             - name: envoy.file_access_log
               config:
                 path: /dev/stdout
+                json_format:
+                  listener: "ingress"
+                  start_time: "%START_TIME%"
+                  method: "%REQ(:METHOD)%"
+                  path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                  protocol: "%PROTOCOL%"
+                  response_code: "%RESPONSE_CODE%"
+                  response_flags: "%RESPONSE_FLAGS%"
+                  bytes_received: "%BYTES_RECEIVED%"
+                  bytes_sent: "%BYTES_SENT%"
+                  duration: "%DURATION%"
+                  upstream-service-time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                  forwarded-for: "%REQ(X-FORWARDED-FOR)%"
+                  user-agent: "%REQ(USER-AGENT)%"
+                  request-id: "%REQ(X-REQUEST-ID)%"
+                  authority: "%REQ(:AUTHORITY)%"
+                  upstream_host: "%UPSTREAM_HOST%"
+                  grpc-status: "%RESP(grpc-status)%"
+                  grpc-message: "%RESP(grpc-message)%"
+                  grpc-status-trailer: "%TRAILER(grpc-status)%"
+                  grpc-message-trailer: "%TRAILER(grpc-message)%"
           stat_prefix: ingress_http
           codec_type: AUTO
           route_config:
@@ -40,6 +61,27 @@ static_resources:
             - name: envoy.file_access_log
               config:
                 path: /dev/stdout
+                json_format:
+                  listener: "egress"
+                  start_time: "%START_TIME%"
+                  method: "%REQ(:METHOD)%"
+                  path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                  protocol: "%PROTOCOL%"
+                  response_code: "%RESPONSE_CODE%"
+                  response_flags: "%RESPONSE_FLAGS%"
+                  bytes_received: "%BYTES_RECEIVED%"
+                  bytes_sent: "%BYTES_SENT%"
+                  duration: "%DURATION%"
+                  upstream-service-time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                  forwarded-for: "%REQ(X-FORWARDED-FOR)%"
+                  user-agent: "%REQ(USER-AGENT)%"
+                  request-id: "%REQ(X-REQUEST-ID)%"
+                  authority: "%REQ(:AUTHORITY)%"
+                  upstream_host: "%UPSTREAM_HOST%"
+                  grpc-status: "%RESP(grpc-status)%"
+                  grpc-message: "%RESP(grpc-message)%"
+                  grpc-status-trailer: "%TRAILER(grpc-status)%"
+                  grpc-message-trailer: "%TRAILER(grpc-message)%"
           stat_prefix: egress_http
           codec_type: AUTO
           route_config:
