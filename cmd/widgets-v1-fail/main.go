@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 
 	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 )
 
 type config struct {
@@ -45,6 +48,10 @@ type Server struct{}
 
 // List lists widgets
 func (s *Server) List(ctx context.Context, r *widgets.ListRequest) (*widgets.ListResponse, error) {
+	if rand.Float64() < 0.10 {
+		return nil, status.Errorf(codes.Unavailable, "random failure")
+	}
+
 	return &widgets.ListResponse{
 		Widgets: []*widgets.Widget{
 			&widgets.Widget{

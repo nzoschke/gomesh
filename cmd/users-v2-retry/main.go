@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	users "github.com/nzoschke/omgrpc/gen/go/protos/users/v2"
 	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
 	"github.com/segmentio/conf"
@@ -36,6 +37,9 @@ func serve(config config) error {
 		config.WidgetsAddr,
 		grpc.WithAuthority("widgets-v1"),
 		grpc.WithInsecure(),
+		grpc.WithUnaryInterceptor(grpc_retry.UnaryClientInterceptor(
+			grpc_retry.WithMax(3),
+		)),
 	)
 	if err != nil {
 		return err

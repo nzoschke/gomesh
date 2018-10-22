@@ -1,0 +1,11 @@
+scrape_configs:
+  - job_name: envoy
+    metrics_path: /stats/prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['envoy-users-v2:9901']
+
+  - job_name: 'prometheus'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['localhost:9090']

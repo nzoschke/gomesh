@@ -10,20 +10,25 @@ With this foundation you can skip over all the setup, and focus entirely on your
 
 It demonstrates:
 
-| Component           | Via                    | Config, Code                      |
-|---------------------|------------------------|:---------------------------------:|
-| Service Definitions | Protocol Buffers       | [💾](protos/users/v1/users.proto) |
-| [Services][2]       | gRPC, Go               | [💾](cmd/users-v1/main.go)        |
-| [Clients][3]        | gRPC, Go               | [💾](cmd/users-v2/main.go)        |
-| Service Discovery   | Envoy, Consul          | 🛠                                |
-| RPC                 | Envoy, gRPC            | 🛠                                |
-| Datastores          | Envoy, Mongo, Redis    | 🛠                                |
-| Rest API Gateway    | Envoy, Swagger         | 🛠                                |
-| GraphQL API Gateway | Rejoiner               | 🛠                                |
-| Observability       | Envoy, Prometheus      | 🛠                                |
+| Component            | Via                                | Config, Code                      |
+|----------------------|------------------------------------|:---------------------------------:|
+| Service Definitions  | Protocol Buffers                   | [⚙️](protos/users/v1/users.proto) |
+| [Services][2]        | gRPC, Go                           | [💾](cmd/users-v1/main.go)        |
+| [Clients][3]         | gRPC, Go                           | [💾](cmd/users-v2/main.go)        |
+| [Service Proxy][4]   | Envoy, gRPC                        | [⚙️](configs/sidecar.yaml)        |
+| [Observability][5]   | Envoy, gRPC middleware, Prometheus | [⚙️](configs/prometheus.yml)      |
+| [Fault tolerance][6] | Envoy, gRPC middleware             | 🛠                                |
+| Rate Limiting        | Envoy, Redis                       | 🛠                                |
+| Service Discovery    | Envoy, Consul                      | 🛠                                |
+| Datastores           | Envoy, Mongo, Redis                | 🛠                                |
+| REST API Gateway     | Envoy, Swagger                     | 🛠                                |
+| GraphQL API Gateway  | Rejoiner                           | 🛠                                |
 
 [2]: docs/grpc-service.md
 [3]: docs/grpc-client.md
+[4]: docs/envoy-service-proxy.md
+[5]: docs/observability-prometheus.md
+[6]: docs/fault-tolerance.md
 
 ## Quick Start
 
@@ -32,12 +37,14 @@ This project uses:
 - [Go 1.11](https://golang.org/)
 - [grpc-go](https://github.com/grpc/grpc-go)
 - [Prototool](https://github.com/uber/prototool)
+- [protoc-gen-go](https://github.com/golang/protobuf)
 
 
 Install the CLI tools:
 
 ```console
 $ brew install go prototool
+$ go get -u github.com/golang/protobuf/protoc-gen-go
 ```
 
 ### Get the project

@@ -1,0 +1,138 @@
+admin:
+  access_log_path: /dev/stdout
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 9901 }
+
+static_resources:
+  listeners:
+  - name: ingress
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 9000 }
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          access_log:
+            - name: envoy.file_access_log
+              config:
+                path: /dev/stdout
+                json_format:
+                  listener: "ingress"
+                  start_time: "%START_TIME%"
+                  method: "%REQ(:METHOD)%"
+                  path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                  protocol: "%PROTOCOL%"
+                  response_code: "%RESPONSE_CODE%"
+                  response_flags: "%RESPONSE_FLAGS%"
+                  bytes_received: "%BYTES_RECEIVED%"
+                  bytes_sent: "%BYTES_SENT%"
+                  duration: "%DURATION%"
+                  upstream-service-time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                  forwarded-for: "%REQ(X-FORWARDED-FOR)%"
+                  user-agent: "%REQ(USER-AGENT)%"
+                  request-id: "%REQ(X-REQUEST-ID)%"
+                  authority: "%REQ(:AUTHORITY)%"
+                  upstream_host: "%UPSTREAM_HOST%"
+                  grpc-status: "%RESP(grpc-status)%"
+                  grpc-message: "%RESP(grpc-message)%"
+                  grpc-status-trailer: "%TRAILER(grpc-status)%"
+                  grpc-message-trailer: "%TRAILER(grpc-message)%"
+                  overloaded: "%RESP(X-ENVOY-OVERLOADED)%"
+          stat_prefix: ingress_http
+          codec_type: AUTO
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: users-v2
+              domains: ["*"]
+              routes:
+              - match: { prefix: "/" }
+                route: { cluster: users-v2 }
+          http_filters:
+          - name: envoy.router
+
+  - name: egress
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 9100 }
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          access_log:
+            - name: envoy.file_access_log
+              config:
+                path: /dev/stdout
+                json_format:
+                  listener: "egress"
+                  start_time: "%START_TIME%"
+                  method: "%REQ(:METHOD)%"
+                  path: "%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+                  protocol: "%PROTOCOL%"
+                  response_code: "%RESPONSE_CODE%"
+                  response_flags: "%RESPONSE_FLAGS%"
+                  bytes_received: "%BYTES_RECEIVED%"
+                  bytes_sent: "%BYTES_SENT%"
+                  duration: "%DURATION%"
+                  upstream-service-time: "%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+                  forwarded-for: "%REQ(X-FORWARDED-FOR)%"
+                  user-agent: "%REQ(USER-AGENT)%"
+                  request-id: "%REQ(X-REQUEST-ID)%"
+                  authority: "%REQ(:AUTHORITY)%"
+                  upstream_host: "%UPSTREAM_HOST%"
+                  grpc-status: "%RESP(grpc-status)%"
+                  grpc-message: "%RESP(grpc-message)%"
+                  grpc-status-trailer: "%TRAILER(grpc-status)%"
+                  grpc-message-trailer: "%TRAILER(grpc-message)%"
+                  attempt-count: "%REQ(X-ENVOY-ATTEMPT-COUNT)%"
+          stat_prefix: egress_http
+          codec_type: AUTO
+          route_config:
+            name: local_route
+            virtual_hosts:
+            - name: widgets-v1
+              domains: ["widgets-v1"]
+              include_request_attempt_count: true
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: widgets-v1
+                  retry_policy:
+                    retry_on: unavailable
+                    num_retries: 5
+          http_filters:
+          - name: envoy.router
+
+  clusters:
+  - name: users-v2
+    http2_protocol_options: {}
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: users-v2
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: users-v2
+                port_value: 8000
+
+  - name: widgets-v1
+    http2_protocol_options: {}
+    circuit_breakers:
+      thresholds:
+        - max_retries: 10
+    connect_timeout: 0.25s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: widgets-v1
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: widgets-v1
+                port_value: 8000
