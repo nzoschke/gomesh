@@ -1,4 +1,4 @@
-# Oh My gRPC
+# gomesh
 
 Building a reliable service oriented architecture is easier than ever, once you learn the gRPC framework and ecosystem of tools that interoperate around Protocol Buffer service definitions.
 
