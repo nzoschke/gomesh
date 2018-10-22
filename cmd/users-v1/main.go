@@ -31,7 +31,7 @@ func serve() error {
 		return err
 	}
 
-	fmt.Println("listening on :8000!")
+	fmt.Println("listening on :8000")
 	return s.Serve(l)
 }
 
