@@ -1,5 +1,7 @@
-FROM golang:1.11
+FROM envoyproxy/envoy:latest
 
-WORKDIR /app
+COPY configs/*         /etc/envoy/
+COPY bin/envoy.sh      /usr/local/bin/
+COPY bin/linux_amd64/* /usr/local/bin/
 
-COPY bin/linux_amd64/* /go/bin/
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/usr/local/bin/envoy.sh"]

@@ -4,6 +4,13 @@ admin:
     socketAddress:
       address: 0.0.0.0
       portValue: 9901
+dynamic_resources:
+  cds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+        envoy_grpc:
+          cluster_name: xds
 staticResources:
   clusters:
   - connectTimeout: 0.250s
@@ -18,6 +25,19 @@ staticResources:
                 address: 0.0.0.0
                 portValue: 8000
     name: local
+    type: STRICT_DNS
+  - connectTimeout: 0.250s
+    http2ProtocolOptions: {}
+    loadAssignment:
+      clusterName: xds
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: xds
+                portValue: 10000
+    name: xds
     type: STRICT_DNS
   listeners:
   - address:

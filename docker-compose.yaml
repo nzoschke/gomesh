@@ -1,21 +1,19 @@
 version: '3'
 services:
-  envoy-users-v2:
-    build:
-        context: .
-        dockerfile: Dockerfile-envoy
-    command: ["envoy", "-c", "/etc/envoy/sidecar.yaml"]
-    ports:
-      - "80:9000"   # expose ingress
-      - "9901:9901" # expose admin
-
   users-v2:
     build: .
-    command: ["users-v2", "-w", "envoy-users-v2:9100"] # sidecar egress
+    command: ["users-v2", "-w", "0.0.0.0:11000"] # connect to external services through envoy egress
+    environment:
+      - ENVOY_OPTS=-c /etc/envoy/sidecar-xds.yaml
+    ports:
+      - "80:10000"  # map envoy ingress
+      - "9901:9901" # map envoy admin
 
   widgets-v1:
     build: .
     command: ["widgets-v1"]
+    environment:
+      - ENVOY_OPTS=-c /etc/envoy/sidecar-xds.yaml
 
   prometheus:
     build:
@@ -23,3 +21,12 @@ services:
         dockerfile: Dockerfile-prometheus
     ports:
       - "9090:9090"
+
+  xds:
+    build: .
+    command: ["xds-docker"]
+    environment:
+      - ENVOY_CLUSTER=xds
+      - ENVOY_OPTS=-c /etc/envoy/sidecar.yaml
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock:ro
