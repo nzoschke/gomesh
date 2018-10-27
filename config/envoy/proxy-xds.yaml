@@ -4,20 +4,27 @@ admin:
     socketAddress:
       address: 0.0.0.0
       portValue: 9901
+dynamic_resources:
+  cds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+        envoy_grpc:
+          cluster_name: xds
 staticResources:
   clusters:
   - connectTimeout: 0.250s
     http2ProtocolOptions: {}
     loadAssignment:
-      clusterName: users-v2
+      clusterName: xds
       endpoints:
       - lbEndpoints:
         - endpoint:
             address:
               socketAddress:
-                address: users-v2
+                address: xds
                 portValue: 10000
-    name: users-v2
+    name: xds
     type: STRICT_DNS
   listeners:
   - address:
@@ -55,6 +62,7 @@ staticResources:
                   prefix: /
                 route:
                   cluster: users-v2
+            validate_clusters: false  # defer to CDS
           statPrefix: ingress_http
         name: envoy.http_connection_manager
     name: ingress
