@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"strconv"
 	"time"
 
@@ -26,8 +27,10 @@ type config struct {
 // Server implements the Envoy xDS Cluster Discovery Service
 type Server struct {
 	DockerClient *docker.Client
-	lastTime     time.Time
-	lastVersion  int
+	DockerLabel  string
+
+	lastTime    time.Time
+	lastVersion int
 }
 
 func main() {
@@ -48,9 +51,21 @@ func serve(config config) error {
 		return err
 	}
 
+	// introspect self to get project
+	h, err := os.Hostname()
+	if err != nil {
+		return err
+	}
+
+	i, err := c.ContainerInspect(context.Background(), h)
+	if err != nil {
+		return err
+	}
+
 	s := grpc.NewServer()
 	xds.RegisterClusterDiscoveryServiceServer(s, &Server{
 		DockerClient: c,
+		DockerLabel:  i.Config.Labels["com.docker.compose.project"],
 	})
 	reflection.Register(s)
 
@@ -100,7 +115,7 @@ func (s *Server) StreamClusters(server xds.ClusterDiscoveryService_StreamCluster
 		filter.Add("type", "container")
 		filter.Add("event", "start")
 		filter.Add("event", "die")
-		filter.Add("label", "com.docker.compose.project=gomesh")
+		filter.Add("label", fmt.Sprintf("com.docker.compose.project=%s", s.DockerLabel))
 
 		events, errs := s.DockerClient.Events(context.Background(), types.EventsOptions{
 			Since:   s.lastTime.Format(time.RFC3339Nano),
@@ -113,6 +128,7 @@ func (s *Server) StreamClusters(server xds.ClusterDiscoveryService_StreamCluster
 				return err
 			case e := <-events:
 				// FIXME: should send incremental update for specific event
+				fmt.Printf("EVENT: %+v\n", e)
 				err = s.sendClusters(server, time.Unix(0, e.TimeNano))
 				if err != nil {
 					return err
@@ -159,7 +175,7 @@ func (s *Server) clusters(ctx context.Context) ([]xds.Cluster, error) {
 	addresses := map[string][]core.Address_SocketAddress{}
 
 	for _, c := range cs {
-		if c.Labels["com.docker.compose.project"] != "gomesh" {
+		if c.Labels["com.docker.compose.project"] != s.DockerLabel {
 			continue
 		}
 
@@ -173,11 +189,23 @@ func (s *Server) clusters(ctx context.Context) ([]xds.Cluster, error) {
 			addresses[name] = []core.Address_SocketAddress{}
 		}
 
-		// assume single port specified
+		// default to conventional envoy sidecar port
 		port := 10000
-		// for p := range i.Config.ExposedPorts {
-		// 	port = p.Int()
-		// }
+
+		// select an exposed port, biased to the convention
+		for p := range i.Config.ExposedPorts {
+			port = p.Int()
+			if p.Int() == 10000 {
+				break
+			}
+		}
+
+		// use explicit label if set
+		if p, ok := c.Labels["port"]; ok {
+			if i, err := strconv.Atoi(p); err == nil {
+				port = i
+			}
+		}
 
 		// assume single network specified
 		ip := "0.0.0.0"
@@ -187,6 +215,8 @@ func (s *Server) clusters(ctx context.Context) ([]xds.Cluster, error) {
 
 		addresses[name] = append(addresses[name], address(ip, port))
 	}
+
+	fmt.Printf("ADDRESSES: %+v\n", addresses)
 
 	clusters := []xds.Cluster{}
 	for n, as := range addresses {

@@ -13,8 +13,8 @@ configs/sidecar.yaml: cmd/envoy-cfg/main.go
 	# mv /tmp/sidecar.yaml configs/sidecar.yaml
 
 compose-discovery: bins
-	docker-compose -f config/docker/compose-discovery.yaml -p gomesh build
-	docker-compose -f config/docker/compose-discovery.yaml -p gomesh up
+	docker-compose -f config/docker/compose-discovery.yaml build
+	docker-compose -f config/docker/compose-discovery.yaml up
 
 setup:
 	go get -u github.com/golang/protobuf/protoc-gen-go
