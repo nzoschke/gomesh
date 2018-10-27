@@ -1,0 +1,4 @@
+FROM envoyproxy/envoy:latest
+
+COPY config/envoy/*    /etc/envoy/
+COPY gen/pb/           /etc/
