@@ -1,14 +1,13 @@
 syntax = "proto3";
 
-package omgrpc.users.v2;
+package gomesh.users.v1;
 
-option go_package = "v2pb";
+option go_package = "v1pb";
 option java_multiple_files = true;
 option java_outer_classname = "UsersProto";
-option java_package = "com.omgrpc.users.v2";
+option java_package = "com.gomesh.users.v1";
 
 import "google/protobuf/timestamp.proto";
-import "protos/widgets/v1/widgets.proto";
 
 service Users {
   rpc Get(GetRequest) returns (User);
@@ -21,7 +20,6 @@ message User {
   string name = 3;
   string display_name = 4;
   google.protobuf.Timestamp create_time = 5;
-  repeated omgrpc.widgets.v1.Widget widgets = 6;
 }
 
 message GetRequest {

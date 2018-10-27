@@ -1,4 +1,4 @@
-module github.com/nzoschke/omgrpc
+module github.com/nzoschke/gomesh
 
 require (
 	github.com/docker/distribution v2.6.2+incompatible // indirect

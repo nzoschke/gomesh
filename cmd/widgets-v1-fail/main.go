@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"net"
 
-	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
+	widgets "github.com/nzoschke/gomesh/gen/go/proto/widgets/v1"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

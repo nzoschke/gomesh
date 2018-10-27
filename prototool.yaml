@@ -3,12 +3,12 @@ protoc:
 
 create:
   packages:
-    - directory: protos
-      name: omgrpc
+    - directory: proto
+      name: gomesh
 
 generate:
   go_options:
-    import_path: github.com/nzoschke/omgrpc
+    import_path: github.com/nzoschke/gomesh
 
   plugins:
     - name: go
