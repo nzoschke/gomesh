@@ -1,0 +1,101 @@
+admin:
+  accessLogPath: /dev/stdout
+  address:
+    socketAddress:
+      address: 0.0.0.0
+      portValue: 9901
+dynamic_resources:
+  cds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+        envoy_grpc:
+          cluster_name: xds
+staticResources:
+  clusters:
+  - connectTimeout: 0.250s
+    http2ProtocolOptions: {}
+    loadAssignment:
+      clusterName: local
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: 0.0.0.0
+                portValue: 8000
+    name: local
+    type: STRICT_DNS
+  - connectTimeout: 0.250s
+    http2ProtocolOptions: {}
+    loadAssignment:
+      clusterName: xds
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: xds
+                portValue: 10000
+    name: xds
+    type: STRICT_DNS
+  listeners:
+  - address:
+      socketAddress:
+        address: 0.0.0.0
+        portValue: 11000
+    filterChains:
+    - filters:
+      - config:
+          accessLog:
+          - config:
+              format: |
+                egress  [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%"
+              path: /dev/stdout
+            name: envoy.file_access_log
+          httpFilters:
+          - name: envoy.router
+          routeConfig:
+            name: local
+            virtualHosts:
+            - domains:
+              - "*"
+              name: local
+              routes:
+              - match:
+                  prefix: /
+                route:
+                  cluster_header: :authority
+          statPrefix: egress_http
+        name: envoy.http_connection_manager
+    name: egress
+  - address:
+      socketAddress:
+        address: 0.0.0.0
+        portValue: 10000
+    filterChains:
+    - filters:
+      - config:
+          accessLog:
+          - config:
+              format: |
+                ingress [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%" %RESPONSE_CODE% %RESPONSE_FLAGS% %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% "%REQ(X-FORWARDED-FOR)%" "%REQ(USER-AGENT)%" "%REQ(X-REQUEST-ID)%" "%REQ(:AUTHORITY)%" "%UPSTREAM_HOST%"
+              path: /dev/stdout
+            name: envoy.file_access_log
+          httpFilters:
+          - name: envoy.grpc_http1_bridge
+          - name: envoy.router
+          routeConfig:
+            name: local
+            virtualHosts:
+            - domains:
+              - '*'
+              name: local
+              routes:
+              - match:
+                  prefix: /
+                route:
+                  cluster: local
+          statPrefix: ingress_http
+        name: envoy.http_connection_manager
+    name: ingress

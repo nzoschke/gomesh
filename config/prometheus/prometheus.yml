@@ -1,0 +1,24 @@
+scrape_configs:
+  - job_name: users-v2
+    metrics_path: /stats/prometheus
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names:
+          - users-v2
+        port: 9901
+        type: A
+
+  - job_name: widgets-v1
+    metrics_path: /stats/prometheus
+    scrape_interval: 5s
+    dns_sd_configs:
+      - names:
+          - widgets-v1
+        port: 9901
+        type: A
+
+  - job_name: prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - localhost:9090

@@ -1,8 +1,18 @@
 module github.com/nzoschke/omgrpc
 
 require (
+	github.com/docker/distribution v2.6.2+incompatible // indirect
+	github.com/docker/docker v1.13.1
+	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/docker/go-units v0.3.3 // indirect
+	github.com/envoyproxy/go-control-plane v0.6.1
+	github.com/ghodss/yaml v1.0.0
+	github.com/gogo/googleapis v1.1.0 // indirect
+	github.com/gogo/protobuf v1.1.1
 	github.com/golang/protobuf v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/lyft/protoc-gen-validate v0.0.8 // indirect
+	github.com/pkg/errors v0.8.0 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/conf v1.0.0
 	github.com/segmentio/go-snakecase v1.0.0 // indirect
