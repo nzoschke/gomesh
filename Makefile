@@ -12,11 +12,9 @@ configs/sidecar.yaml: cmd/envoy-cfg/main.go
 		envoy -c /tmp/sidecar.yaml --mode validate
 	mv /tmp/sidecar.yaml configs/sidecar.yaml
 
-build: bins
-	docker-compose build
-
-dev: build
-	docker-compose up
+compose-discovery: bins
+	docker-compose -f config/docker/compose-discovery.yaml -p gomesh build
+	docker-compose -f config/docker/compose-discovery.yaml -p gomesh up
 
 setup:
 	go get -u github.com/golang/protobuf/protoc-gen-go
