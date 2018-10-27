@@ -63,6 +63,7 @@ staticResources:
               path: /dev/stdout
             name: envoy.file_access_log
           httpFilters:
+          - name: envoy.grpc_http1_bridge
           - name: envoy.router
           routeConfig:
             name: local
