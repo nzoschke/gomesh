@@ -1,3 +1,0 @@
-FROM envoyproxy/envoy:latest
-
-COPY ./configs/* /etc/envoy/
