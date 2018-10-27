@@ -16,5 +16,13 @@ compose-mesh: bins
 	docker-compose -f config/docker/compose-mesh.yaml build
 	docker-compose -f config/docker/compose-mesh.yaml up
 
+compose-proxy: bins
+	docker-compose -f config/docker/compose-proxy.yaml -p gomesh build
+	docker-compose -f config/docker/compose-proxy.yaml -p gomesh up --abort-on-container-exit
+
+generate:
+	prototool generate
+	bin/pbtool.sh
+
 setup:
 	go get -u github.com/golang/protobuf/protoc-gen-go
