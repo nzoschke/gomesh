@@ -50,6 +50,15 @@ staticResources:
               proto_descriptor: /etc/proto/users/v2/users.pb
               services:
                 - gomesh.users.v2.Users
+          - name: envoy.grpc_json_transcoder
+            config:
+              print_options:
+                add_whitespace: true
+                preserve_proto_field_names: true
+                always_print_primitive_fields: true
+              proto_descriptor: /etc/proto/widgets/v2/widgets.pb
+              services:
+                - gomesh.widgets.v2.Widgets
           - name: envoy.router
           routeConfig:
             name: local
@@ -59,9 +68,13 @@ staticResources:
               name: local
               routes:
               - match:
-                  prefix: /
+                  prefix: /gomesh.widgets.v2.Users
                 route:
                   cluster: users-v2
+              - match:
+                  prefix: /gomesh.widgets.v2.Widgets
+                route:
+                  cluster: widgets-v2
             validate_clusters: false  # defer to CDS
           statPrefix: ingress_http
         name: envoy.http_connection_manager
