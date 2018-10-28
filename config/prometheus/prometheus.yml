@@ -1,4 +1,11 @@
+---
 scrape_configs:
+  - job_name: prometheus
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - localhost:9090
+
   - job_name: proxy
     metrics_path: /stats/prometheus
     scrape_interval: 5s
@@ -25,9 +32,3 @@ scrape_configs:
           - widgets-v1
         port: 9901
         type: A
-
-  - job_name: prometheus
-    scrape_interval: 5s
-    static_configs:
-      - targets:
-          - localhost:9090
