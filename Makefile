@@ -12,11 +12,11 @@ configs/sidecar.yaml: cmd/envoy-cfg/main.go
 		envoy -c /tmp/sidecar.yaml --mode validate
 	# mv /tmp/sidecar.yaml configs/sidecar.yaml
 
-compose-mesh: bins
+compose-mesh: generate bins
 	docker-compose -f config/docker/compose-mesh.yaml build
 	docker-compose -f config/docker/compose-mesh.yaml up
 
-compose-proxy: bins
+compose-proxy: generate bins
 	docker-compose -f config/docker/compose-proxy.yaml -p gomesh build
 	docker-compose -f config/docker/compose-proxy.yaml -p gomesh up --abort-on-container-exit
 

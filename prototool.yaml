@@ -5,6 +5,7 @@ protoc:
   version: 3.6.1
   includes:
     - vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis
+    - vendor/github.com/lyft/protoc-gen-validate
 
 create:
   packages:
@@ -24,6 +25,11 @@ generate:
       type: go
       output: gen/go
       flags: plugins=grpc
+
+    - name: validate
+      type: go
+      output: gen/go
+      flags: lang=go
 
 lint:
   rules:

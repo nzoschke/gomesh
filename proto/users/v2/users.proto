@@ -10,11 +10,12 @@ option java_package = "com.gomesh.users.v2";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "proto/widgets/v1/widgets.proto";
+import "validate/validate.proto";
 
 service Users {
   rpc Get(GetRequest) returns (User) {
     option (google.api.http) = {
-      get: "/v2/users"
+      get: "/v2/users/{name=*}"
     };
   }
   rpc Create(CreateRequest) returns (User);
@@ -30,7 +31,13 @@ message User {
 }
 
 message GetRequest {
-  string name = 1;
+  string name = 1 [
+    (validate.rules).string = {
+      pattern: "^[a-z]+$"
+      min_len: 2
+      max_len: 64
+    }
+  ];
 }
 
 message CreateRequest {
