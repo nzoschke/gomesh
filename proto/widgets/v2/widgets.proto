@@ -36,7 +36,7 @@ service Widgets {
   // Takes Widget name (with parent User) in path, and Widget in body
   rpc Update(UpdateRequest) returns (Widget) {
     option (google.api.http) = {
-      patch: "/v2/{widget.name=usrs/*/widgets/*}"
+      patch: "/v2/{widget.name=users/*/widgets/*}"
       body: "*"
     };
   }
@@ -67,11 +67,10 @@ service Widgets {
 }
 
 message Widget {
-  string id = 1;
-  string parent = 2;
-  string name = 3;
-  string display_name = 4;
-  google.protobuf.Timestamp create_time = 5;
+  string parent = 1;
+  string name = 2;
+  string display_name = 3;
+  google.protobuf.Timestamp create_time = 4;
 }
 
 message GetRequest {
@@ -96,10 +95,17 @@ message CreateRequest {
       max_bytes: 512
     }
   ];
+  // ID
+  string id = 2 [
+    (validate.rules).string = {
+      pattern: "^[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
   // Widget
   //
   // Required
-  Widget widget = 2 [(validate.rules).message.required = true];
+  Widget widget = 3 [(validate.rules).message.required = true];
 }
 
 message UpdateRequest {
