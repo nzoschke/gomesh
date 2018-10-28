@@ -26,3 +26,11 @@ generate:
 
 setup:
 	go get -u github.com/golang/protobuf/protoc-gen-go
+
+.PHONY: vendor
+vendor:
+	git remote add -f -t master --no-tags protoc-gen-validate https://github.com/lyft/protoc-gen-validate.git || true
+	git remote add -f -t master --no-tags grpc-gateway        https://github.com/grpc-ecosystem/grpc-gateway  || true
+	git rm -rf vendor/
+	git read-tree --prefix=vendor/github.com/lyft/protoc-gen-validate/validate/ -u protoc-gen-validate/master:validate
+	git read-tree --prefix=vendor/github.com/grpc-ecosystem/grpc-gateway/third_party -u grpc-gateway/master:third_party
