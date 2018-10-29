@@ -22,11 +22,11 @@ services:
       - "80:10000"   # map envoy ingress
       - "9901:9901"  # map envoy admin
 
-  users-v2:
+  users-v3:
     build:
       context: ../..
       dockerfile: config/docker/Dockerfile
-    command: ["users-v2", "-w", "0.0.0.0:11000"]  # use envoy egress
+    command: ["users-v3", "-w", "0.0.0.0:11000"]  # use envoy egress
     environment:
       - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
 
