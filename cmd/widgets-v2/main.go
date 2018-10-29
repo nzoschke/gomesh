@@ -28,7 +28,7 @@ type config struct {
 func main() {
 	config := config{
 		Port:      8000,
-		MongoAddr: "mongo:29781",
+		MongoAddr: "mongo:27017",
 	}
 	conf.Load(&config)
 
@@ -38,7 +38,7 @@ func main() {
 }
 
 func serve(config config) error {
-	session, err := mgo.Dial("mongo")
+	session, err := mgo.Dial(config.MongoAddr)
 	if err != nil {
 		return err
 	}

@@ -34,9 +34,9 @@ services:
     build:
       context: ../..
       dockerfile: config/docker/Dockerfile
-    command: ["widgets-v2", "-m", "0.0.0.0:11000"]  # use envoy egress
+    command: ["widgets-v2", "-m", "0.0.0.0:27017"]  # use envoy mongo proxy
     environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
+      - ENVOY_CONFIG=/etc/envoy/sidecar-mongo.yaml
 
   xds:
     build:
