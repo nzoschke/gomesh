@@ -12,21 +12,21 @@ configs/sidecar.yaml: cmd/envoy-cfg/main.go
 		envoy -c /tmp/sidecar.yaml --mode validate
 	# mv /tmp/sidecar.yaml configs/sidecar.yaml
 
-compose-api: generate bins
+compose-api: bins
 	docker-compose -f config/docker/compose-api.yaml -p gomesh build
 	docker-compose -f config/docker/compose-api.yaml -p gomesh up
 
-compose-mesh: generate bins
+compose-mesh: bins
 	docker-compose -f config/docker/compose-mesh.yaml -p gomesh build
 	docker-compose -f config/docker/compose-mesh.yaml -p gomesh up
 
-compose-proxy: generate bins
+compose-proxy: bins
 	docker-compose -f config/docker/compose-proxy.yaml -p gomesh build
 	docker-compose -f config/docker/compose-proxy.yaml -p gomesh up --abort-on-container-exit
 
 generate:
-	prototool generate
-	bin/pbtool.sh
+	docker build -f config/docker/Dockerfile-prototool -t prototool . 2>/dev/null
+	docker run -v $(PWD):/in prototool /bin/prototool.sh
 
 setup:
 	go get -u github.com/golang/protobuf/protoc-gen-go

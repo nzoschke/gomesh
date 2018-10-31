@@ -2,6 +2,10 @@
 set -e -o pipefail
 PWD=$(pwd)
 
+prototool generate
+
+# Piggy back on `prototool compile` to run custom commands for every .proto input
+#
 # Example output from `prototool compile --dry-run`:
 #
 # /Users/noah/Library/Caches/prototool/Darwin/x86_64/protobuf/3.6.1/bin/protoc \
