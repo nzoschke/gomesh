@@ -23,6 +23,7 @@ generate:
   plugins:
     - name: ts
       output: gen/ts
+      flags: service=true
 
     - name: go
       type: go
