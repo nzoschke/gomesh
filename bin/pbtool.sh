@@ -11,17 +11,26 @@ PWD=$(pwd)
 #   /Users/noah/dev/gomesh/proto/users/v1/users.proto
 
 prototool compile --dry-run | while read x; do
-    # get last arg, e.g. /Users/noah/dev/gomesh/proto/users/v1/users.proto
-    IN=$(echo $x | grep -oE "[^ ]+$")
+    # get last arg
+    IN=$(echo $x | grep -oE "[^ ]+$")      # /Users/noah/dev/gomesh/proto/users/v1/users.proto
 
-    # translate to output, e.g. /Users/noah/dev/gomesh/gen/pb/proto/users/v1/users.pb
-    OUT=${IN/$PWD/$PWD/gen/pb}
-    OUT=${OUT/.proto/.pb}
+    # get arg components
+    IN_FILE=${IN/$PWD\//}                  # proto/users/v1/users.proto
+    IN_DIR=$(dirname $IN_FILE)             # proto/users/v1
 
-    # replace /dev/null with output
-    CMD=${x/\/dev\/null/$OUT}
+    # make dir and compile .pb
+    OUT_DIR=gen/pb/${IN_DIR}               # gen/pb/proto/users/v1
+    mkdir -p $OUT_DIR
 
-    # make dir and compile
-    mkdir -p $(dirname $OUT)
+    OUT_FILE=gen/pb/${IN_FILE/.proto/.pb}  # gen/pb/proto/users/v1/users.pb
+    CMD=${x/\/dev\/null/$OUT_FILE}         # replace /dev/null with output
     $CMD --include_imports
+
+    # make dir and generate mock
+    OUT_DIR=gen/go/${IN_DIR}/mock          # gen/go/proto/users/v1/mock
+    mkdir -p $OUT_DIR
+
+    SOURCE=gen/go/${IN_FILE/.proto/.pb.go} # gen/go/proto/users/v1/users.pb.go
+    OUT_FILE=$OUT_DIR/mock.go              # gen/go/proto/users/v1/mock/mock.go
+    mockgen -source=$SOURCE > $OUT_FILE
 done
