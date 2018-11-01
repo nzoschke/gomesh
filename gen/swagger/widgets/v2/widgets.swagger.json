@@ -22,7 +22,7 @@
         "operationId": "Get",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v2Widget"
             }
@@ -47,7 +47,7 @@
         "operationId": "Delete",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/protobufEmpty"
             }
@@ -73,7 +73,7 @@
         "operationId": "List",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v2ListResponse"
             }
@@ -110,7 +110,7 @@
         "operationId": "Create",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v2Widget"
             }
@@ -145,7 +145,7 @@
         "operationId": "BatchGet",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v2BatchGetResponse"
             }
@@ -180,7 +180,7 @@
         "operationId": "Update",
         "responses": {
           "200": {
-            "description": "A successful response.",
+            "description": "",
             "schema": {
               "$ref": "#/definitions/v2Widget"
             }
