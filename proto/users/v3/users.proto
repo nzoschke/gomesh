@@ -9,8 +9,8 @@ option java_package = "com.gomesh.users.v3";
 
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "proto/widgets/v2/widgets.proto";
 import "validate/validate.proto";
+import "widgets/v2/widgets.proto";
 
 service Users {
   // Get User

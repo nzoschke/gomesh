@@ -8,7 +8,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/golang/protobuf/ptypes"
-	users "github.com/nzoschke/gomesh/gen/go/proto/users/v1"
+	users "github.com/nzoschke/gomesh/gen/go/users/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
