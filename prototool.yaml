@@ -1,5 +1,6 @@
 excludes:
- - vendor/
+  # - vendor/
+  - node_modules/
 
 protoc:
   version: 3.6.1
@@ -22,8 +23,12 @@ generate:
 
   plugins:
     - name: ts
-      output: gen/ts
+      output: gen/js
       flags: service=true
+
+    - name: js
+      output: gen/js
+      flags: binary,import_style=commonjs
 
     - name: go
       type: go
