@@ -9,12 +9,6 @@ prototool generate vendor
 #
 # Example output from `prototool compile --dry-run`:
 #
-# /Users/noah/Library/Caches/prototool/Darwin/x86_64/protobuf/3.6.1/bin/protoc \
-#   -I /Users/noah/Library/Caches/prototool/Darwin/x86_64/protobuf/3.6.1/include \
-#   -I /Users/noah/dev/gomesh \
-#   -o /dev/null \
-#   /Users/noah/dev/gomesh/proto/users/v1/users.proto
-
 # /root/.cache/prototool/Linux/x86_64/protobuf/3.6.1/bin/protoc \
 #   -I /in/vendor/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 #   -I /in/vendor/github.com/lyft/protoc-gen-validate \
