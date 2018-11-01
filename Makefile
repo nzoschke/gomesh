@@ -4,6 +4,11 @@ bins: $(BINS)
 $(BINS): bin/linux_amd64/%: cmd/%/main.go $(shell find . -name '*.go')
 	GOOS=linux GOARCH=amd64 go build -o $@ $<
 
+COMPOSE_CMD = docker-compose -p gomesh
+COMPOSE_FILES = -f config/docker/compose-api.yaml \
+	-f config/docker/compose-mesh.yaml \
+	-f config/docker/compose-proxy.yaml
+
 configs/sidecar.yaml: cmd/envoy-cfg/main.go
 	go run $< /tmp/sidecar.yaml
 	docker run \
@@ -12,24 +17,27 @@ configs/sidecar.yaml: cmd/envoy-cfg/main.go
 		envoy -c /tmp/sidecar.yaml --mode validate
 	# mv /tmp/sidecar.yaml configs/sidecar.yaml
 
-compose-api: bins
-	docker-compose -f config/docker/compose-api.yaml -p gomesh build
-	docker-compose -f config/docker/compose-api.yaml -p gomesh up
+compose-build:
+	$(COMPOSE_CMD) $(COMPOSE_FILES) build
 
-compose-mesh: bins
-	docker-compose -f config/docker/compose-mesh.yaml -p gomesh build
-	docker-compose -f config/docker/compose-mesh.yaml -p gomesh up
+compose-down:
+	$(COMPOSE_CMD) $(COMPOSE_FILES) down
 
-compose-proxy: bins
-	docker-compose -f config/docker/compose-proxy.yaml -p gomesh build
-	docker-compose -f config/docker/compose-proxy.yaml -p gomesh up --abort-on-container-exit
+compose-api:
+	make -j bins
+	$(COMPOSE_CMD) -f config/docker/compose-api.yaml   up --abort-on-container-exit
+
+compose-mesh:
+	make -j bins
+	$(COMPOSE_CMD) -f config/docker/compose-mesh.yaml  up --abort-on-container-exit
+
+compose-proxy:
+	make -j bins
+	$(COMPOSE_CMD) -f config/docker/compose-proxy.yaml up --abort-on-container-exit
 
 generate:
 	docker build -f config/docker/Dockerfile-prototool -t prototool . 2>/dev/null
 	docker run -v $(PWD):/in prototool /bin/prototool.sh
-
-setup:
-	go get -u github.com/golang/protobuf/protoc-gen-go
 
 .PHONY: vendor
 vendor:
