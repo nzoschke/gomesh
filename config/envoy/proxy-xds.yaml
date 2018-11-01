@@ -50,13 +50,14 @@ staticResources:
               path: /dev/stdout
             name: envoy.file_access_log
           httpFilters:
+          - name: envoy.grpc_web
           - name: envoy.grpc_json_transcoder
             config:
               print_options:
                 add_whitespace: true
                 preserve_proto_field_names: true
                 always_print_primitive_fields: true
-              proto_descriptor: /etc/proto/users/v3/users.pb
+              proto_descriptor: /etc/pb/users/v3/users.pb
               services:
                 - gomesh.users.v3.Users
           - name: envoy.grpc_json_transcoder
@@ -65,7 +66,7 @@ staticResources:
                 add_whitespace: true
                 preserve_proto_field_names: true
                 always_print_primitive_fields: true
-              proto_descriptor: /etc/proto/widgets/v2/widgets.pb
+              proto_descriptor: /etc/pb/widgets/v2/widgets.pb
               services:
                 - gomesh.widgets.v2.Widgets
           - name: envoy.router
