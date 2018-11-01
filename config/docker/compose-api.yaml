@@ -21,6 +21,9 @@ services:
     ports:
       - "80:10000"   # map envoy ingress
       - "9901:9901"  # map envoy admin
+    volumes:
+      - ../../config/envoy/:/etc/envoy/
+      - ../../gen/pb/:/etc/pb/
 
   users-v3:
     build:
@@ -29,6 +32,8 @@ services:
     command: ["users-v3", "-w", "0.0.0.0:11000"]  # use envoy egress
     environment:
       - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
+    volumes:
+      - ../../bin/linux_amd64/:/usr/local/sbin/
 
   widgets-v2:
     build:
@@ -37,6 +42,8 @@ services:
     command: ["widgets-v2", "-m", "0.0.0.0:27017"]  # use envoy mongo proxy
     environment:
       - ENVOY_CONFIG=/etc/envoy/sidecar-mongo.yaml
+    volumes:
+      - ../../bin/linux_amd64/:/usr/local/sbin/
 
   xds:
     build:
@@ -46,4 +53,5 @@ services:
     environment:
       - ENVOY_CONFIG=/etc/envoy/sidecar.yaml
     volumes:
+      - ../../bin/linux_amd64/:/usr/local/sbin/
       - /var/run/docker.sock:/var/run/docker.sock:ro
