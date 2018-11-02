@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"net"
 
-	users "github.com/nzoschke/omgrpc/gen/go/protos/users/v2"
-	widgets "github.com/nzoschke/omgrpc/gen/go/protos/widgets/v1"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
+	users "github.com/nzoschke/gomesh/gen/go/users/v2"
+	widgets "github.com/nzoschke/gomesh/gen/go/widgets/v1"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -43,7 +45,13 @@ func serve(config config) error {
 	defer conn.Close()
 	c := widgets.NewWidgetsClient(conn)
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_validator.UnaryServerInterceptor(),
+			),
+		),
+	)
 	users.RegisterUsersServer(s, &Server{
 		WidgetsClient: c,
 	})

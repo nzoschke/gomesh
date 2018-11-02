@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package gomesh.users.v1;
+
+option go_package = "v1pb";
+option java_multiple_files = true;
+option java_outer_classname = "UsersProto";
+option java_package = "com.gomesh.users.v1";
+
+import "google/protobuf/timestamp.proto";
+
+service Users {
+  rpc Get(GetRequest) returns (User);
+  rpc Create(CreateRequest) returns (User);
+}
+
+message User {
+  string id = 1;
+  string parent = 2;
+  string name = 3;
+  string display_name = 4;
+  google.protobuf.Timestamp create_time = 5;
+}
+
+message GetRequest {
+  string name = 1;
+}
+
+message CreateRequest {
+  string parent = 1;
+  User user = 2;
+}

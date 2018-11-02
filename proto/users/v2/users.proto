@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package gomesh.users.v2;
+
+option go_package = "v2pb";
+option java_multiple_files = true;
+option java_outer_classname = "UsersProto";
+option java_package = "com.gomesh.users.v2";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+import "widgets/v1/widgets.proto";
+
+service Users {
+  rpc Get(GetRequest) returns (User) {
+    option (google.api.http) = {
+      get: "/v2/users/{name=*}"
+    };
+  }
+  rpc Create(CreateRequest) returns (User);
+}
+
+message User {
+  string id = 1;
+  string parent = 2;
+  string name = 3;
+  string display_name = 4;
+  google.protobuf.Timestamp create_time = 5;
+  repeated gomesh.widgets.v1.Widget widgets = 6;
+}
+
+message GetRequest {
+  string name = 1 [
+    (validate.rules).string = {
+      pattern: "^[a-z]+$"
+      min_len: 2
+      max_len: 64
+    }
+  ];
+}
+
+message CreateRequest {
+  string parent = 1;
+  User user = 2;
+}

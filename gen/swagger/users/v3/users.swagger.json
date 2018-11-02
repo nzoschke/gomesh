@@ -1,0 +1,87 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "users/v3/users.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v3/{name=users/*}": {
+      "get": {
+        "summary": "Get User",
+        "description": "Takes User name in path",
+        "operationId": "Get",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/v3User"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "name",
+            "description": "Name\n\nFormat \"users/{user}\"",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "v2Widget": {
+      "type": "object",
+      "properties": {
+        "parent": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v3User": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "widgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/v2Widget"
+          }
+        }
+      }
+    }
+  }
+}

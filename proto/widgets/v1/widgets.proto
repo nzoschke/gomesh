@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package gomesh.widgets.v1;
+
+option go_package = "v1pb";
+option java_multiple_files = true;
+option java_outer_classname = "WidgetsProto";
+option java_package = "com.gomesh.widgets.v1";
+
+import "google/protobuf/timestamp.proto";
+
+service Widgets {
+  rpc List(ListRequest) returns (ListResponse);
+}
+
+message Widget {
+  string id = 1;
+  string parent = 2;
+  string name = 3;
+  string display_name = 4;
+  google.protobuf.Timestamp create_time = 5;
+}
+
+message ListRequest {
+  string parent = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListResponse {
+  repeated Widget widgets = 1;
+  string next_page_token = 2;
+}
