@@ -6,8 +6,8 @@ import (
 	"net"
 
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	users "github.com/nzoschke/gomesh/gen/go/proto/users/v2"
-	widgets "github.com/nzoschke/gomesh/gen/go/proto/widgets/v1"
+	users "github.com/nzoschke/gomesh/gen/go/users/v2"
+	widgets "github.com/nzoschke/gomesh/gen/go/widgets/v1"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
