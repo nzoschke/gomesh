@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net"
 
@@ -9,11 +8,10 @@ import (
 	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
 	users "github.com/nzoschke/gomesh/gen/go/users/v3"
 	widgets "github.com/nzoschke/gomesh/gen/go/widgets/v2"
+	usersServer "github.com/nzoschke/gomesh/server/users/v3"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
-	"google.golang.org/grpc/status"
 )
 
 type config struct {
@@ -52,7 +50,7 @@ func serve(config config) error {
 			),
 		),
 	)
-	users.RegisterUsersServer(s, &Server{
+	users.RegisterUsersServer(s, &usersServer.Server{
 		WidgetsClient: c,
 	})
 	reflection.Register(s)
@@ -66,26 +64,3 @@ func serve(config config) error {
 	return s.Serve(l)
 }
 
-// Server implements the widgets/v2 interface
-type Server struct {
-	WidgetsClient widgets.WidgetsClient
-}
-
-func handleError(err error) error {
-	return status.Error(codes.Unimplemented, "unimplemented")
-}
-
-// Get returns a User with their Widgets
-func (s *Server) Get(ctx context.Context, u *users.GetRequest) (*users.User, error) {
-	r, err := s.WidgetsClient.List(ctx, &widgets.ListRequest{
-		Parent: u.Name,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &users.User{
-		Name:    u.Name,
-		Widgets: r.Widgets,
-	}, nil
-}
