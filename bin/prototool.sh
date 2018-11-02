@@ -32,12 +32,4 @@ prototool compile proto --dry-run | while read x; do
     OUT_FILE=gen/pb/${IN_FILE/.proto/.pb}  # gen/pb/users/v1/users.pb
     CMD=${x/\/dev\/null/$OUT_FILE}         # replace /dev/null with output
     $CMD --include_imports
-
-    # make dir and generate mock
-    OUT_DIR=gen/go/${IN_DIR}/mock          # gen/go/users/v1/mock
-    mkdir -p $OUT_DIR
-
-    SOURCE=gen/go/${IN_FILE/.proto/.pb.go} # gen/go/users/v1/users.pb.go
-    OUT_FILE=$OUT_DIR/mock.go              # gen/go/users/v1/mock/mock.go
-    mockgen -source=$SOURCE > $OUT_FILE
 done

@@ -36,8 +36,11 @@ compose-proxy:
 	$(COMPOSE_CMD) -f config/docker/compose-proxy.yaml up --abort-on-container-exit
 
 generate:
-	docker build -f config/docker/Dockerfile-prototool -t prototool . 2>/dev/null
+	docker build -f config/docker/Dockerfile-prototool -t prototool .
 	docker run -v $(PWD):/in prototool /bin/prototool.sh
+	# FIXME: add to prototool package
+	find gen/go/ -name 'mock*' | xargs rm
+	mockery -all -dir gen/go -inpkg
 
 .PHONY: vendor
 vendor:
