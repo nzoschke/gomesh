@@ -15,5 +15,5 @@ client.get(req, (err, user) => {
 })
 
 function log(o) {
-    console.log(util.inspect(o.toObject(), false, null, true /* enable colors */))
+    console.log(util.inspect(o.toObject(), false, null, true))
 }
