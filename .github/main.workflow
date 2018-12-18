@@ -8,7 +8,7 @@ action "gen" {
 }
 
 action "push-gen" {
-  needs = ["generate"]
+  needs = ["gen"]
   uses = "docker://debian:9-slim"
   runs = ".github/push-gen.sh"
   secrets = ["GITHUB_TOKEN"]
