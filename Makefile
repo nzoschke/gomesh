@@ -4,6 +4,15 @@ bins: $(BINS)
 $(BINS): bin/linux_amd64/%: cmd/%/main.go $(shell find . -name '*.go')
 	GOOS=linux GOARCH=amd64 go build -o $@ $<
 
+# generate on .proto file changes
+PROTOS = $(wildcard proto/*/*/*.proto)
+PBGOS  = $(PROTOS:proto/%.proto=gen/go/%.pb.go)
+$(PBGOS): gen/go/%.pb.go: proto/prototool.yaml proto/%.proto proto_ext/prototool.yaml
+	cd ./.github/action/gen && docker build -t gen .
+	docker run -v $(PWD):/github/workspace gen
+
+gen: $(PBGOS)
+
 COMPOSE_CMD = docker-compose -p gomesh
 COMPOSE_FILES = -f config/docker/compose-api.yaml \
 	-f config/docker/compose-mesh.yaml \
@@ -34,18 +43,3 @@ compose-mesh:
 compose-proxy:
 	make -j bins
 	$(COMPOSE_CMD) -f config/docker/compose-proxy.yaml up --abort-on-container-exit
-
-generate:
-	docker build -f config/docker/Dockerfile-prototool -t prototool .
-	docker run -v $(PWD):/in prototool /bin/prototool.sh
-	# FIXME: add to prototool package
-	find gen/go/ -name 'mock*' | xargs rm
-	mockery -all -dir gen/go -inpkg
-
-.PHONY: vendor
-vendor:
-	git remote add -f -t master --no-tags protoc-gen-validate https://github.com/lyft/protoc-gen-validate.git || true
-	git remote add -f -t master --no-tags grpc-gateway        https://github.com/grpc-ecosystem/grpc-gateway  || true
-	git rm -rf vendor/
-	git read-tree --prefix=vendor/github.com/lyft/protoc-gen-validate/validate/ -u protoc-gen-validate/master:validate
-	git read-tree --prefix=vendor/github.com/grpc-ecosystem/grpc-gateway/third_party -u grpc-gateway/master:third_party
