@@ -1,13 +1,13 @@
-// package: gomesh.widgets.v2
-// file: widgets/v2/widgets.proto
+// package: gomesh.widgets.v3
+// file: widgets/v3/widgets.proto
 
-var widgets_v2_widgets_pb = require("../../widgets/v2/widgets_pb");
+var widgets_v3_widgets_pb = require("../../widgets/v3/widgets_pb");
 var google_protobuf_empty_pb = require("google-protobuf/google/protobuf/empty_pb");
 var grpc = require("grpc-web-client").grpc;
 
 var Widgets = (function () {
   function Widgets() {}
-  Widgets.serviceName = "gomesh.widgets.v2.Widgets";
+  Widgets.serviceName = "gomesh.widgets.v3.Widgets";
   return Widgets;
 }());
 
@@ -16,8 +16,8 @@ Widgets.Get = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.GetRequest,
-  responseType: widgets_v2_widgets_pb.Widget
+  requestType: widgets_v3_widgets_pb.GetRequest,
+  responseType: widgets_v3_widgets_pb.Widget
 };
 
 Widgets.Create = {
@@ -25,8 +25,8 @@ Widgets.Create = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.CreateRequest,
-  responseType: widgets_v2_widgets_pb.Widget
+  requestType: widgets_v3_widgets_pb.CreateRequest,
+  responseType: widgets_v3_widgets_pb.Widget
 };
 
 Widgets.Update = {
@@ -34,8 +34,8 @@ Widgets.Update = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.UpdateRequest,
-  responseType: widgets_v2_widgets_pb.Widget
+  requestType: widgets_v3_widgets_pb.UpdateRequest,
+  responseType: widgets_v3_widgets_pb.Widget
 };
 
 Widgets.Delete = {
@@ -43,7 +43,7 @@ Widgets.Delete = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.DeleteRequest,
+  requestType: widgets_v3_widgets_pb.DeleteRequest,
   responseType: google_protobuf_empty_pb.Empty
 };
 
@@ -52,8 +52,8 @@ Widgets.List = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.ListRequest,
-  responseType: widgets_v2_widgets_pb.ListResponse
+  requestType: widgets_v3_widgets_pb.ListRequest,
+  responseType: widgets_v3_widgets_pb.ListResponse
 };
 
 Widgets.BatchGet = {
@@ -61,8 +61,8 @@ Widgets.BatchGet = {
   service: Widgets,
   requestStream: false,
   responseStream: false,
-  requestType: widgets_v2_widgets_pb.BatchGetRequest,
-  responseType: widgets_v2_widgets_pb.BatchGetResponse
+  requestType: widgets_v3_widgets_pb.BatchGetRequest,
+  responseType: widgets_v3_widgets_pb.BatchGetResponse
 };
 
 exports.Widgets = Widgets;

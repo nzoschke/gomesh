@@ -20,8 +20,10 @@ export class Widgets {
 
 export type ServiceError = { message: string, code: number; metadata: grpc.Metadata }
 export type Status = { details: string, code: number; metadata: grpc.Metadata }
-export type ServiceClientOptions = { transport: grpc.TransportConstructor; debug?: boolean }
 
+interface UnaryResponse {
+  cancel(): void;
+}
 interface ResponseStream<T> {
   cancel(): void;
   on(type: 'data', handler: (message: T) => void): ResponseStream<T>;
@@ -35,27 +37,27 @@ interface RequestStream<T> {
   on(type: 'end', handler: () => void): RequestStream<T>;
   on(type: 'status', handler: (status: Status) => void): RequestStream<T>;
 }
-interface BidirectionalStream<T> {
-  write(message: T): BidirectionalStream<T>;
+interface BidirectionalStream<ReqT, ResT> {
+  write(message: ReqT): BidirectionalStream<ReqT, ResT>;
   end(): void;
   cancel(): void;
-  on(type: 'data', handler: (message: T) => void): BidirectionalStream<T>;
-  on(type: 'end', handler: () => void): BidirectionalStream<T>;
-  on(type: 'status', handler: (status: Status) => void): BidirectionalStream<T>;
+  on(type: 'data', handler: (message: ResT) => void): BidirectionalStream<ReqT, ResT>;
+  on(type: 'end', handler: () => void): BidirectionalStream<ReqT, ResT>;
+  on(type: 'status', handler: (status: Status) => void): BidirectionalStream<ReqT, ResT>;
 }
 
 export class WidgetsClient {
   readonly serviceHost: string;
 
-  constructor(serviceHost: string, options?: ServiceClientOptions);
+  constructor(serviceHost: string, options?: grpc.RpcOptions);
   list(
     requestMessage: widgets_v1_widgets_pb.ListRequest,
     metadata: grpc.Metadata,
     callback: (error: ServiceError|null, responseMessage: widgets_v1_widgets_pb.ListResponse|null) => void
-  ): void;
+  ): UnaryResponse;
   list(
     requestMessage: widgets_v1_widgets_pb.ListRequest,
     callback: (error: ServiceError|null, responseMessage: widgets_v1_widgets_pb.ListResponse|null) => void
-  ): void;
+  ): UnaryResponse;
 }
 

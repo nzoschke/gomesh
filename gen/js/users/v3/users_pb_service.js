@@ -30,7 +30,7 @@ UsersClient.prototype.get = function get(requestMessage, metadata, callback) {
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  grpc.unary(Users.Get, {
+  var client = grpc.unary(Users.Get, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -49,6 +49,12 @@ UsersClient.prototype.get = function get(requestMessage, metadata, callback) {
       }
     }
   });
+  return {
+    cancel: function () {
+      callback = null;
+      client.close();
+    }
+  };
 };
 
 exports.UsersClient = UsersClient;

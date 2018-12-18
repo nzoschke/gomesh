@@ -30,8 +30,10 @@ export class Users {
 
 export type ServiceError = { message: string, code: number; metadata: grpc.Metadata }
 export type Status = { details: string, code: number; metadata: grpc.Metadata }
-export type ServiceClientOptions = { transport: grpc.TransportConstructor; debug?: boolean }
 
+interface UnaryResponse {
+  cancel(): void;
+}
 interface ResponseStream<T> {
   cancel(): void;
   on(type: 'data', handler: (message: T) => void): ResponseStream<T>;
@@ -45,36 +47,36 @@ interface RequestStream<T> {
   on(type: 'end', handler: () => void): RequestStream<T>;
   on(type: 'status', handler: (status: Status) => void): RequestStream<T>;
 }
-interface BidirectionalStream<T> {
-  write(message: T): BidirectionalStream<T>;
+interface BidirectionalStream<ReqT, ResT> {
+  write(message: ReqT): BidirectionalStream<ReqT, ResT>;
   end(): void;
   cancel(): void;
-  on(type: 'data', handler: (message: T) => void): BidirectionalStream<T>;
-  on(type: 'end', handler: () => void): BidirectionalStream<T>;
-  on(type: 'status', handler: (status: Status) => void): BidirectionalStream<T>;
+  on(type: 'data', handler: (message: ResT) => void): BidirectionalStream<ReqT, ResT>;
+  on(type: 'end', handler: () => void): BidirectionalStream<ReqT, ResT>;
+  on(type: 'status', handler: (status: Status) => void): BidirectionalStream<ReqT, ResT>;
 }
 
 export class UsersClient {
   readonly serviceHost: string;
 
-  constructor(serviceHost: string, options?: ServiceClientOptions);
+  constructor(serviceHost: string, options?: grpc.RpcOptions);
   get(
     requestMessage: users_v1_users_pb.GetRequest,
     metadata: grpc.Metadata,
     callback: (error: ServiceError|null, responseMessage: users_v1_users_pb.User|null) => void
-  ): void;
+  ): UnaryResponse;
   get(
     requestMessage: users_v1_users_pb.GetRequest,
     callback: (error: ServiceError|null, responseMessage: users_v1_users_pb.User|null) => void
-  ): void;
+  ): UnaryResponse;
   create(
     requestMessage: users_v1_users_pb.CreateRequest,
     metadata: grpc.Metadata,
     callback: (error: ServiceError|null, responseMessage: users_v1_users_pb.User|null) => void
-  ): void;
+  ): UnaryResponse;
   create(
     requestMessage: users_v1_users_pb.CreateRequest,
     callback: (error: ServiceError|null, responseMessage: users_v1_users_pb.User|null) => void
-  ): void;
+  ): UnaryResponse;
 }
 

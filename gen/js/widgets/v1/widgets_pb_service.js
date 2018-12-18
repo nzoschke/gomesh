@@ -30,7 +30,7 @@ WidgetsClient.prototype.list = function list(requestMessage, metadata, callback)
   if (arguments.length === 2) {
     callback = arguments[1];
   }
-  grpc.unary(Widgets.List, {
+  var client = grpc.unary(Widgets.List, {
     request: requestMessage,
     host: this.serviceHost,
     metadata: metadata,
@@ -49,6 +49,12 @@ WidgetsClient.prototype.list = function list(requestMessage, metadata, callback)
       }
     }
   });
+  return {
+    cancel: function () {
+      callback = null;
+      client.close();
+    }
+  };
 };
 
 exports.WidgetsClient = WidgetsClient;

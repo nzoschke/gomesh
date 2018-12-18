@@ -1,7 +1,7 @@
-// package: gomesh.widgets.v2
-// file: widgets/v2/widgets.proto
+// package: gomesh.widgets.v3
+// file: widgets/v3/widgets.proto
 
-import * as widgets_v2_widgets_pb from "../../widgets/v2/widgets_pb";
+import * as widgets_v3_widgets_pb from "../../widgets/v3/widgets_pb";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import {grpc} from "grpc-web-client";
 
@@ -10,8 +10,8 @@ type WidgetsGet = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.GetRequest;
-  readonly responseType: typeof widgets_v2_widgets_pb.Widget;
+  readonly requestType: typeof widgets_v3_widgets_pb.GetRequest;
+  readonly responseType: typeof widgets_v3_widgets_pb.Widget;
 };
 
 type WidgetsCreate = {
@@ -19,8 +19,8 @@ type WidgetsCreate = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.CreateRequest;
-  readonly responseType: typeof widgets_v2_widgets_pb.Widget;
+  readonly requestType: typeof widgets_v3_widgets_pb.CreateRequest;
+  readonly responseType: typeof widgets_v3_widgets_pb.Widget;
 };
 
 type WidgetsUpdate = {
@@ -28,8 +28,8 @@ type WidgetsUpdate = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.UpdateRequest;
-  readonly responseType: typeof widgets_v2_widgets_pb.Widget;
+  readonly requestType: typeof widgets_v3_widgets_pb.UpdateRequest;
+  readonly responseType: typeof widgets_v3_widgets_pb.Widget;
 };
 
 type WidgetsDelete = {
@@ -37,7 +37,7 @@ type WidgetsDelete = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.DeleteRequest;
+  readonly requestType: typeof widgets_v3_widgets_pb.DeleteRequest;
   readonly responseType: typeof google_protobuf_empty_pb.Empty;
 };
 
@@ -46,8 +46,8 @@ type WidgetsList = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.ListRequest;
-  readonly responseType: typeof widgets_v2_widgets_pb.ListResponse;
+  readonly requestType: typeof widgets_v3_widgets_pb.ListRequest;
+  readonly responseType: typeof widgets_v3_widgets_pb.ListResponse;
 };
 
 type WidgetsBatchGet = {
@@ -55,8 +55,8 @@ type WidgetsBatchGet = {
   readonly service: typeof Widgets;
   readonly requestStream: false;
   readonly responseStream: false;
-  readonly requestType: typeof widgets_v2_widgets_pb.BatchGetRequest;
-  readonly responseType: typeof widgets_v2_widgets_pb.BatchGetResponse;
+  readonly requestType: typeof widgets_v3_widgets_pb.BatchGetRequest;
+  readonly responseType: typeof widgets_v3_widgets_pb.BatchGetResponse;
 };
 
 export class Widgets {
@@ -102,58 +102,58 @@ export class WidgetsClient {
 
   constructor(serviceHost: string, options?: grpc.RpcOptions);
   get(
-    requestMessage: widgets_v2_widgets_pb.GetRequest,
+    requestMessage: widgets_v3_widgets_pb.GetRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   get(
-    requestMessage: widgets_v2_widgets_pb.GetRequest,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    requestMessage: widgets_v3_widgets_pb.GetRequest,
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   create(
-    requestMessage: widgets_v2_widgets_pb.CreateRequest,
+    requestMessage: widgets_v3_widgets_pb.CreateRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   create(
-    requestMessage: widgets_v2_widgets_pb.CreateRequest,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    requestMessage: widgets_v3_widgets_pb.CreateRequest,
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   update(
-    requestMessage: widgets_v2_widgets_pb.UpdateRequest,
+    requestMessage: widgets_v3_widgets_pb.UpdateRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   update(
-    requestMessage: widgets_v2_widgets_pb.UpdateRequest,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.Widget|null) => void
+    requestMessage: widgets_v3_widgets_pb.UpdateRequest,
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.Widget|null) => void
   ): UnaryResponse;
   delete(
-    requestMessage: widgets_v2_widgets_pb.DeleteRequest,
+    requestMessage: widgets_v3_widgets_pb.DeleteRequest,
     metadata: grpc.Metadata,
     callback: (error: ServiceError|null, responseMessage: google_protobuf_empty_pb.Empty|null) => void
   ): UnaryResponse;
   delete(
-    requestMessage: widgets_v2_widgets_pb.DeleteRequest,
+    requestMessage: widgets_v3_widgets_pb.DeleteRequest,
     callback: (error: ServiceError|null, responseMessage: google_protobuf_empty_pb.Empty|null) => void
   ): UnaryResponse;
   list(
-    requestMessage: widgets_v2_widgets_pb.ListRequest,
+    requestMessage: widgets_v3_widgets_pb.ListRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.ListResponse|null) => void
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.ListResponse|null) => void
   ): UnaryResponse;
   list(
-    requestMessage: widgets_v2_widgets_pb.ListRequest,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.ListResponse|null) => void
+    requestMessage: widgets_v3_widgets_pb.ListRequest,
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.ListResponse|null) => void
   ): UnaryResponse;
   batchGet(
-    requestMessage: widgets_v2_widgets_pb.BatchGetRequest,
+    requestMessage: widgets_v3_widgets_pb.BatchGetRequest,
     metadata: grpc.Metadata,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.BatchGetResponse|null) => void
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.BatchGetResponse|null) => void
   ): UnaryResponse;
   batchGet(
-    requestMessage: widgets_v2_widgets_pb.BatchGetRequest,
-    callback: (error: ServiceError|null, responseMessage: widgets_v2_widgets_pb.BatchGetResponse|null) => void
+    requestMessage: widgets_v3_widgets_pb.BatchGetRequest,
+    callback: (error: ServiceError|null, responseMessage: widgets_v3_widgets_pb.BatchGetResponse|null) => void
   ): UnaryResponse;
 }
 
