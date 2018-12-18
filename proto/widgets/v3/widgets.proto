@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package gomesh.widgets.v3;
+
+option go_package = "v3pb";
+option java_multiple_files = true;
+option java_outer_classname = "WidgetsProto";
+option java_package = "com.gomesh.widgets.v3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+service Widgets {
+  rpc Get(GetRequest) returns (Widget);
+  rpc Create(CreateRequest) returns (Widget);
+  rpc Update(UpdateRequest) returns (Widget);
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc BatchGet(BatchGetRequest) returns (BatchGetResponse);
+}
+
+message Widget {
+  string parent = 1;
+  string name = 2;
+  string display_name = 3;
+  google.protobuf.Timestamp create_time = 4;
+}
+
+message GetRequest {
+  string name = 1;
+}
+
+message CreateRequest {
+  string parent = 1;
+  string id = 2;
+  Widget widget = 3;
+}
+
+message UpdateRequest {
+  Widget widget = 1;
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+message DeleteRequest {
+  string name = 1;
+}
+
+message ListRequest {
+  string parent = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListResponse {
+  repeated Widget widgets = 1;
+  string next_page_token = 2;
+}
+
+message BatchGetRequest {
+  string parent = 1;
+  repeated string names = 2;
+}
+
+message BatchGetResponse {
+  repeated Widget widgets = 1;
+}
