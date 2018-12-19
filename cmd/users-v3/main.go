@@ -6,8 +6,8 @@ import (
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_validator "github.com/grpc-ecosystem/go-grpc-middleware/validator"
-	users "github.com/nzoschke/gomesh/gen/go/users/v3"
-	widgets "github.com/nzoschke/gomesh/gen/go/widgets/v2"
+	users "github.com/nzoschke/gomesh-proto/gen/go/users/v3"
+	widgets "github.com/nzoschke/gomesh-proto/gen/go/widgets/v2"
 	usersServer "github.com/nzoschke/gomesh/server/users/v3"
 	"github.com/segmentio/conf"
 	"google.golang.org/grpc"

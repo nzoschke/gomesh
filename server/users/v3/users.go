@@ -3,8 +3,8 @@ package users
 import (
 	"context"
 
-	users "github.com/nzoschke/gomesh/gen/go/users/v3"
-	widgets "github.com/nzoschke/gomesh/gen/go/widgets/v2"
+	users "github.com/nzoschke/gomesh-proto/gen/go/users/v3"
+	widgets "github.com/nzoschke/gomesh-proto/gen/go/widgets/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
