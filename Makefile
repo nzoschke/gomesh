@@ -4,14 +4,8 @@ bins: $(BINS)
 $(BINS): bin/linux_amd64/%: cmd/%/main.go $(shell find . -name '*.go')
 	GOOS=linux GOARCH=amd64 go build -o $@ $<
 
-# generate on .proto file changes
-PROTOS = $(wildcard proto/*/*/*.proto)
-PBGOS  = $(PROTOS:proto/%.proto=gen/go/%.pb.go)
-$(PBGOS): gen/go/%.pb.go: proto/prototool.yaml proto/%.proto proto_ext/prototool.yaml
-	cd ./.github/action/gen && docker build -t gen .
-	docker run -v $(PWD):/github/workspace gen
-
-gen: $(PBGOS)
+clean:
+	rm bin/linux_amd64/*
 
 COMPOSE_CMD = docker-compose -p gomesh
 COMPOSE_FILES = -f config/docker/compose-api.yaml \

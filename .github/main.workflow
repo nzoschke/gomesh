@@ -1,15 +1,9 @@
 workflow "new workflow" {
   on = "push"
-  resolves = ["push-gen"]
+  resolves = ["make"]
 }
 
-action "gen" {
-  uses = "./.github/action/gen"
-}
-
-action "push-gen" {
-  needs = ["gen"]
-  uses = "./.github/action/gen"
-  runs = ".github/push-gen.sh"
-  secrets = ["GITHUB_TOKEN"]
+action "make" {
+  uses = "golang:1.11"
+  runs = "make bins"
 }
