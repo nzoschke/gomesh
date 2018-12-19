@@ -27,6 +27,8 @@ github.com/golang/protobuf v1.2.0 h1:P3YflyNX/ehuJFLhxviNdFxQPkGK5cDcApsge1SqnvM
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0 h1:BWIsLfhgKhV5g/oF34aRjniBHLTZe5DNekSjbAjIS6c=
 github.com/grpc-ecosystem/go-grpc-middleware v1.0.0/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
+github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20181112102510-3304cc886352 h1:1GXyC+LmruB9uk340NwSS6UPwWNXM3xe6pbGpsXqAKc=
+github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20181112102510-3304cc886352/go.mod h1:FiyG127CGDf3tlThmgyCl78X/SZQqEOJBCDaAfeWzPs=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/lyft/protoc-gen-validate v0.0.12 h1:4yfI8PSMdUqdTrQqjNIgjTJ7Vl3zFNqtgBGXsB7QJiw=
 github.com/lyft/protoc-gen-validate v0.0.12/go.mod h1:XbGvPuh87YZc5TdIa2/I4pLk0QoUACkjt2znoq26NVQ=

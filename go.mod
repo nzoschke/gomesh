@@ -12,7 +12,7 @@ require (
 	github.com/gogo/googleapis v1.1.0 // indirect
 	github.com/gogo/protobuf v1.2.0
 	github.com/golang/protobuf v1.2.0
-	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20181112102510-3304cc886352
 	github.com/nzoschke/gomesh-proto v0.0.0-20181219010129-6db8d023921f
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
