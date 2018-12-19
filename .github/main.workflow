@@ -1,9 +1,9 @@
 workflow "new workflow" {
   on = "push"
-  resolves = ["make"]
+  resolves = ["make bins"]
 }
 
-action "make" {
-  uses = "golang:1.11"
+action "make bins" {
+  uses = "docker://golang:1.11"
   runs = "make bins"
 }
