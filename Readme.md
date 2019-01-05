@@ -43,9 +43,9 @@ It demonstrates:
 [15]: docs/envoy-service-mesh.md
 [16]: config/envoy/sidecar.yaml
 [17]: docs/envoy-service-proxy.md
-[18]: config/envoy/proxy.yaml
+[18]: config/envoy/proxy-xds.yaml
 [19]: docs/observability-envoy-prometheus.md
-[20]: config/prometheus/dns-sd.yaml
+[20]: config/prometheus/dns-sd.yml
 
 ## Quick Start
 
