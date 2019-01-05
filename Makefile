@@ -10,6 +10,9 @@ clean:
 dc-build:
 	docker-compose -f config/docker/compose-mesh.yaml -f config/docker/compose-proxy.yaml --project-directory . build
 
+dc-down:
+	docker-compose -f config/docker/compose-mesh.yaml -f config/docker/compose-proxy.yaml --project-directory . down
+
 dc-up-mesh:
 	make -j bins
 	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up --abort-on-container-exit
