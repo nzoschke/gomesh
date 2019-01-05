@@ -1,46 +1,73 @@
 ---
 version: "3"
 services:
+  prometheus:
+    image: prom/prometheus:v2.6.0
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
   proxy:
+    command: ["sh", "-c", "envoy -c /etc/envoy/proxy-xds.yaml --service-node $$HOSTNAME --service-cluster proxy"]
     build:
-      context: ../..
-      dockerfile: config/docker/Dockerfile
-    environment:
-      - ENVOY_CLUSTER=proxy
-      - ENVOY_CONFIG=/etc/envoy/proxy-xds.yaml
+      context: .
+      dockerfile: config/docker/Dockerfile-proxy
     ports:
       - "80:10000"   # map envoy ingress
       - "9901:9901"  # map envoy admin
+    volumes:
+      - ./config/envoy:/etc/envoy
 
   users-v2:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["users-v2", "-w", "0.0.0.0:11000"]  # use envoy egress
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
+    command: [
+      "users-v2",
+      "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
+      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar
+    ]
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
 
-  widgets-v1:
+  users-v2-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - users-v2:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  widgets-v2:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["widgets-v1"]
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
+    command: ["widgets-v2", "-p", "8000"]
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
 
-  prometheus:
-    build:
-      context: ../..
-      dockerfile: config/docker/Dockerfile-prometheus
-    ports:
-      - "9090:9090"
+  widgets-v2-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - widgets-v2:local
+    volumes:
+      - ./config/envoy:/etc/envoy
 
   xds:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["xds-docker"]
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar.yaml
+    command: xds-docker
     volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  xds-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - xds:local
+    volumes:
+      - ./config/envoy:/etc/envoy

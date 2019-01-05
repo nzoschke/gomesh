@@ -22,7 +22,7 @@ staticResources:
         - endpoint:
             address:
               socketAddress:
-                address: 0.0.0.0
+                address: local
                 portValue: 8000
     name: local
     type: STRICT_DNS
@@ -35,7 +35,7 @@ staticResources:
         - endpoint:
             address:
               socketAddress:
-                address: xds
+                address: xds-sidecar
                 portValue: 10000
     name: xds
     type: STRICT_DNS

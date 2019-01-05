@@ -1,0 +1,10 @@
+FROM golang:1.11
+
+ARG GOMESH_VERSION=publish
+
+RUN go get github.com/nzoschke/gomesh-interface/... && \
+  cd /go/src/github.com/nzoschke/gomesh-interface && \
+  git checkout $GOMESH_VERSION
+
+FROM envoyproxy/envoy:v1.9.0
+COPY --from=0 /go/src/github.com/nzoschke/gomesh-interface/gen/pb /etc/pb

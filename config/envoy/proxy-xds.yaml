@@ -22,7 +22,7 @@ staticResources:
         - endpoint:
             address:
               socketAddress:
-                address: xds
+                address: xds-sidecar
                 portValue: 10000
     name: xds
     type: STRICT_DNS
@@ -57,16 +57,16 @@ staticResources:
                 add_whitespace: true
                 preserve_proto_field_names: true
                 always_print_primitive_fields: true
-              proto_descriptor: /etc/pb/users/v3/users.pb
+              proto_descriptor: /etc/pb/users/v2/v2.pb
               services:
-                - gomesh.users.v3.Users
+                - gomesh.users.v2.Users
           - name: envoy.grpc_json_transcoder
             config:
               print_options:
                 add_whitespace: true
                 preserve_proto_field_names: true
                 always_print_primitive_fields: true
-              proto_descriptor: /etc/pb/widgets/v2/widgets.pb
+              proto_descriptor: /etc/pb/widgets/v2/v2.pb
               services:
                 - gomesh.widgets.v2.Widgets
           - name: envoy.router
@@ -78,13 +78,13 @@ staticResources:
               name: local
               routes:
               - match:
-                  prefix: /gomesh.users.v3.Users
+                  prefix: /gomesh.users.v2.Users
                 route:
-                  cluster: users-v3
+                  cluster: users-v2-sidecar
               - match:
                   prefix: /gomesh.widgets.v2.Widgets
                 route:
-                  cluster: widgets-v2
+                  cluster: widgets-v2-sidecar
             validate_clusters: false  # defer to CDS
           statPrefix: ingress_http
         name: envoy.http_connection_manager

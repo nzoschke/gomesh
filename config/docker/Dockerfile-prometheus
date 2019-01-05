@@ -1,3 +1,0 @@
-FROM prom/prometheus:v2.4.3
-
-COPY ./config/prometheus/* /etc/prometheus/

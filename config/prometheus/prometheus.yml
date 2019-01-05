@@ -16,26 +16,26 @@ scrape_configs:
         port: 9901
         type: A
 
-  - job_name: users-v2
+  - job_name: users-v2-sidecar
     metrics_path: /stats/prometheus
     dns_sd_configs:
       - names:
-          - users-v2
+          - users-v2-sidecar
         port: 9901
         type: A
 
-  - job_name: widgets-v1
+  - job_name: widgets-v2-sidecar
     metrics_path: /stats/prometheus
     dns_sd_configs:
       - names:
-          - widgets-v1
+          - widgets-v2-sidecar
         port: 9901
         type: A
 
-  - job_name: widgets-v2
+  - job_name: xds-sidecar
     metrics_path: /stats/prometheus
     dns_sd_configs:
       - names:
-          - widgets-v2
+          - xds-sidecar
         port: 9901
         type: A
