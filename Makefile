@@ -5,12 +5,15 @@ $(BINS): bin/linux_amd64/%: cmd/%/main.go $(shell find . -name '*.go')
 	GOOS=linux GOARCH=amd64 go build -o $@ $<
 
 clean:
-	rm bin/linux_amd64/*
+	rm -rf bin/linux_amd64/*
 
-dc-up-gateway:
-	make -j bins
-	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up
+dc-build:
+	docker-compose -f config/docker/compose-mesh.yaml -f config/docker/compose-proxy.yaml --project-directory . build
 
 dc-up-mesh:
 	make -j bins
-	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up
+	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up --abort-on-container-exit
+
+dc-up-proxy:
+	make -j bins
+	docker-compose -f config/docker/compose-proxy.yaml --project-directory . up --abort-on-container-exit
