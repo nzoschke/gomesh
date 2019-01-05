@@ -17,14 +17,16 @@ import (
 )
 
 type config struct {
-	Port        int    `conf:"p" help:"Port to listen"`
-	WidgetsAddr string `conf:"w" help:"Widgets service address to dial"`
+	Port             int    `conf:"p"  help:"Port to listen"`
+	WidgetsHost      string `conf:"wh" help:"Widgets service host to dial"`
+	WidgetsAuthority string `conf:"wa" help:"Widgets service authority header"`
 }
 
 func main() {
 	config := config{
-		Port:        8000,
-		WidgetsAddr: "0.0.0.0:8001",
+		Port:             8000,
+		WidgetsHost:      "0.0.0.0:8001",
+		WidgetsAuthority: "widgets-v2",
 	}
 	conf.Load(&config)
 
@@ -38,9 +40,11 @@ func serve(config config) error {
 	logger.SetLevel(log.DebugLevel)
 	logEntry := log.NewEntry(logger)
 
+	logger.Debugf("Config: %+v", config)
+
 	conn, err := grpc.Dial(
-		config.WidgetsAddr,
-		grpc.WithAuthority("widgets-v2"),
+		config.WidgetsHost,
+		grpc.WithAuthority(config.WidgetsAuthority),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
 			grpc_logrus.UnaryClientInterceptor(logEntry),
