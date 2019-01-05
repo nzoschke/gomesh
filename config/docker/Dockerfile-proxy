@@ -1,6 +1,6 @@
 FROM golang:1.11
 
-ARG GOMESH_VERSION=publish
+ARG GOMESH_VERSION=master
 
 RUN go get github.com/nzoschke/gomesh-interface/... && \
   cd /go/src/github.com/nzoschke/gomesh-interface && \
