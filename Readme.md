@@ -10,27 +10,42 @@ With this foundation you can skip over all the setup, and focus entirely on your
 
 It demonstrates:
 
-| Component                | Via                                | Config, Code                      |
-|--------------------------|------------------------------------|:---------------------------------:|
-| [Service Definitions][1] | Protocol Buffers                   | [⚙️](protos/users/v1/users.proto) |
-| [Services][2]            | gRPC, Go                           | [💾](cmd/users-v1/main.go)        |
-| [Clients][3]             | gRPC, Go                           | [💾](cmd/users-v2/main.go)        |
-| [Service Proxy][4]       | Envoy, gRPC                        | [⚙️](config/envoy/sidecar.yaml)   |
-| [Observability][5]       | Envoy, gRPC middleware, Prometheus | [⚙️](configs/prometheus.yml)      |
-| [API Gateway][4]         | Envoy                              | [⚙️](config/envoy/gateway.yaml)   |
-| Rate Limiting            | Envoy, Redis                       | 🛠                                |
-| Service Discovery        | Envoy, Consul                      | 🛠                                |
-| [Fault tolerance][6]     | Envoy, gRPC middleware             | 🛠                                |
-| Datastores               | Envoy, Mongo, Redis                | 🛠                                |
-| REST API Gateway         | Envoy, Swagger                     | 🛠                                |
-| GraphQL API Gateway      | Rejoiner                           | 🛠                                |
+| Component                           | Via                                       | Config, Code    |
+|-------------------------------------|-------------------------------------------|:---------------:|
+| [Service Definitions][1]            | Protocol Buffers                          | [⚙️][2]          |
+| [Client and Server Interfaces][3]   | Docker, GitHub Actions, prototool         | [⚙️][4][💾][5]   |
+| [Services][6]                       | gRPC, Go                                  | [💾][7]          |
+| [Clients][8]                        | gRPC, Go                                  | [💾][9]          |
+| [Proto Design and Conventions][10]  | Google API Design Guide, prototool        | [📖][11]         |
+| [gRPC Middleware][12]               | go-grpc-middleware, protoc-gen-validate   | [⚙️][13][💾][14] |
+| [Service Mesh][15]                  | Docker, Envoy sidecar/discovery, gRPC     | [⚙️][16]         |
+| [Service Proxy][17]                 | Docker, Envoy discovery/transcoding       | [⚙️][18]         |
+| [Observability][19]                 | Envoy logging/stats, Prometheus discovery | [⚙️][20]         |
+| Fault tolerance                     | Envoy retries/circuit breaker             | 🛠               |
+| Datastores                          | Envoy, Mongo, Redis                       | 🛠               |
+| REST API Gateway                    | Envoy filters, Hydra, lyft/ratelimit      | 🛠               |
+| GraphQL API Gateway                 | Rejoiner                                  | 🛠               |
 
 [1]: docs/protocol-buffers.md
-[2]: docs/grpc-service.md
-[3]: docs/grpc-client.md
-[4]: docs/envoy-service-proxy.md
-[5]: docs/observability-prometheus.md
-[6]: docs/fault-tolerance.md
+[2]: https://github.com/nzoschke/gomesh-proto/blob/master/proto/users/v1/users.proto
+[3]: docs/generating-clients-server-interfaces.md
+[4]: https://github.com/nzoschke/gomesh-proto/blob/master/proto/prototool.yaml
+[5]: https://github.com/nzoschke/gomesh-proto/tree/master/.github/action/gen
+[6]: docs/grpc-services.md
+[7]: cmd/server/users-v1/main.go
+[8]: docs/grpc-clients.md
+[9]: cmd/client/users-v1/main.go
+[10]: docs/proto-standards.md
+[11]: https://cloud.google.com/apis/design/
+[12]: docs/grpc-middleware.md
+[13]: https://github.com/nzoschke/gomesh-proto/blob/master/proto/users/v2/users.proto
+[14]: cmd/server/users-v2/main.go
+[15]: docs/envoy-service-mesh.md
+[16]: config/envoy/sidecar.yaml
+[17]: docs/envoy-service-proxy.md
+[18]: config/envoy/proxy.yaml
+[19]: docs/observability-envoy-prometheus.md
+[20]: config/prometheus/dns-sd.yaml
 
 ## Quick Start
 
@@ -132,16 +147,64 @@ This gives us confidence in our gRPC and Go environment.
 We can pull in newer client/server interfaces with `go get`:
 
 ```shell
-$ go get github.com/nzoschke/gomesh-interface@7b002f2c
+$ go get github.com/nzoschke/gomesh-interface@branch
 ```
 
-We can start all the development services:
+We can start all the mesh services / sidecars:
 
 ```shell
-$ make dev
+$ make dc-up-mesh
+GOOS=linux GOARCH=amd64 go build -o bin/linux_amd64/server/widgets-v2 cmd/server/widgets-v2/main.go
+...
+Creating network "gomesh_default" with the default driver
+Creating gomesh_prometheus_1 ... done
+Creating gomesh_widgets-v2_1 ... done
+...
+
+$ grpcurl -d '{"name": "orgs/myorg/users/myuser"}' -plaintext localhost:10000 gomesh.users.v2.Users/Get
 ```
 
+```json
+{
+  "name": "orgs/myorg/users/myuser",
+  "widgets": [
+    {
+      "parent": "orgs/myorg/users/myuser",
+      "name": "orgs/myorg/users/myuser/widgets/bar",
+      "displayName": "A fine widget",
+      "color": "WIDGET_COLOR_BLUE"
+    }
+  ]
+}
+```
+
+We can start all the service proxy and mesh:
+
 ```shell
+$ make dc-up-proxy
+$ curl localhost/v2/orgs/myorg/users/myuser
+```
+
+```json
+{
+ "parent": "",
+ "name": "orgs/myorg/users/myuser",
+ "display_name": "",
+ "widgets": [
+  {
+   "parent": "orgs/myorg/users/myuser",
+   "name": "orgs/myorg/users/myuser/widgets/bar",
+   "display_name": "A fine widget",
+   "color": "WIDGET_COLOR_BLUE"
+  }
+ ]
+}
+```
+
+We can shut everything down:
+
+```shell
+$ make dc-down
 ```
 
 ## Docs
@@ -150,7 +213,7 @@ Check out [the docs folder](docs/) where each component is explained in more det
 
 ## Contributing
 
-Find a bug or see a way to improve the project? [Open an issue](https://github.com/nzoschke/omgrpc/issues).
+Find a bug or see a way to improve the project? [Open an issue](https://github.com/nzoschke/gomesh/issues).
 
 ## License
 
