@@ -6,7 +6,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
 
   users-v2:
     build:

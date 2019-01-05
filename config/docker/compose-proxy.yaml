@@ -6,7 +6,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
 
   proxy:
     command: ["sh", "-c", "envoy -c /etc/envoy/proxy-xds.yaml --service-node $$HOSTNAME --service-cluster proxy"]
