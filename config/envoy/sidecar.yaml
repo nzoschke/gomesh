@@ -82,6 +82,7 @@ staticResources:
             name: envoy.file_access_log
           httpFilters:
           - name: envoy.grpc_http1_bridge
+          - name: envoy.grpc_web
           - name: envoy.router
           routeConfig:
             name: local
@@ -97,3 +98,15 @@ staticResources:
           statPrefix: ingress_http
         name: envoy.http_connection_manager
     name: ingress
+stats_config:
+  stats_tags:
+    - regex: '^cluster(?=\.).*?\.grpc(-(.*?))\.'                         # web
+      tag_name: envoy.grpc_format
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((.*)\.(?:.*)\.)'        # myservice.widgets.v0.Widgets (greedy)
+      tag_name: envoy.grpc_service
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((?:.*)\.(.*)\.)'        # Get
+      tag_name: envoy.grpc_method
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?(\.(?:.*)\.(?:.*)\.(\d+))' # 0 (and remove leading dot)
+      tag_name: envoy.grpc_code
+    - fixed_value: ${SERVICE_NAME}
+      tag_name: service
