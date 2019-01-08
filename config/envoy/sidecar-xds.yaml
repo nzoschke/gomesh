@@ -75,6 +75,8 @@ staticResources:
                   prefix: /
                 route:
                   cluster_header: :authority
+                  retry_policy:
+                    retry_on: cancelled,deadline-exceeded,internal,resource-exhausted,unavailable
           statPrefix: egress_http
         name: envoy.http_connection_manager
     name: egress
@@ -102,6 +104,7 @@ staticResources:
             name: envoy.file_access_log
           httpFilters:
           - name: envoy.grpc_http1_bridge
+          - name: envoy.grpc_web
           - name: envoy.router
           routeConfig:
             name: local
@@ -127,5 +130,3 @@ stats_config:
       tag_name: envoy.grpc_method
     - regex: '^cluster(?=\.).*?\.grpc(?:-web)?(\.(?:.*)\.(?:.*)\.(\d+))' # 0 (and remove leading dot)
       tag_name: envoy.grpc_code
-    - fixed_value: ${SERVICE_NAME}
-      tag_name: service

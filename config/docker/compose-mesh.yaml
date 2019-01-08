@@ -1,3 +1,5 @@
+# This demonstrates an envoy service mesh with sidecars, service discovery, and routing by authority header
+# It exposes all ports for direct introspection
 ---
 version: "3"
 services:
@@ -15,7 +17,7 @@ services:
     command: [
       "users-v2",
       "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
-      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar
+      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar cluster
     ]
     ports:
       - "8000:8000"  # map gRPC server
@@ -28,8 +30,8 @@ services:
     links:
       - users-v2:local
     ports:
-      - "10000:10000"  # map envoy ingress
       - "9901:9901"    # map envoy admin
+      - "10000:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
 
@@ -46,6 +48,9 @@ services:
   widgets-v2-sidecar:
     command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
     image: envoyproxy/envoy:v1.9.0
+    ports:
+      - "9902:9901"    # map envoy admin
+      - "10001:10000"  # map envoy ingress
     links:
       - widgets-v2:local
     volumes:
@@ -56,6 +61,8 @@ services:
       context: .
       dockerfile: config/docker/Dockerfile
     command: xds-docker
+    ports:
+      - "8002:8000"  # map gRPC server
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -66,6 +73,6 @@ services:
     links:
       - xds:local
     ports:
-      - "10001:10000"  # map envoy ingress
+      - "10002:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy

@@ -108,5 +108,3 @@ stats_config:
       tag_name: envoy.grpc_method
     - regex: '^cluster(?=\.).*?\.grpc(?:-web)?(\.(?:.*)\.(?:.*)\.(\d+))' # 0 (and remove leading dot)
       tag_name: envoy.grpc_code
-    - fixed_value: ${SERVICE_NAME}
-      tag_name: service

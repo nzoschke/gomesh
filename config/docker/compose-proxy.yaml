@@ -1,3 +1,5 @@
+# This demonstrates an envoy service proxy with sidecars, service discovery, and routing by authority header
+# It exposes only the proxy ports for security and to enable scaling backing services
 ---
 version: "3"
 services:
@@ -44,6 +46,8 @@ services:
       context: .
       dockerfile: config/docker/Dockerfile
     command: ["widgets-v2", "-p", "8000"]
+    environment:
+      - WIDGETS_V2_ERROR_RATE
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
