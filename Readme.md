@@ -10,7 +10,7 @@ With this foundation you can skip over all the setup, and focus entirely on your
 
 It demonstrates:
 
-| Component                           | Via                                       | Config, Code    |
+| Component                           | With                                      | Docs, Code, Cfg |
 |-------------------------------------|-------------------------------------------|:---------------:|
 | [Service Definitions][1]            | Protocol Buffers                          | [⚙️][2]          |
 | [Client and Server Interfaces][3]   | Docker, GitHub Actions, prototool         | [⚙️][4][💾][5]   |
@@ -19,11 +19,12 @@ It demonstrates:
 | [Proto Design and Conventions][10]  | Google API Design Guide, prototool        | [📖][11]         |
 | [gRPC Middleware][12]               | go-grpc-middleware, protoc-gen-validate   | [⚙️][13][💾][14] |
 | [Service Mesh][15]                  | Docker, Envoy sidecar/discovery, gRPC     | [⚙️][16]         |
-| [Service Proxy][17]                 | Docker, Envoy discovery/transcoding       | [⚙️][18]         |
+| [Service Proxy][17]                 | Docker, Envoy discovery/transcoding, gRPC | [⚙️][18]         |
 | [Observability][19]                 | Envoy logging/stats, Prometheus discovery | [⚙️][20]         |
 | Fault tolerance                     | Envoy retries/circuit breaker             | 🛠               |
-| Datastores                          | Envoy, Mongo, Redis                       | 🛠               |
 | REST API Gateway                    | Envoy filters, Hydra, lyft/ratelimit      | 🛠               |
+| Running on AWS                      | ALB, CloudFormation, ECS                  | 🛠               |
+| Datastores                          | Envoy, Mongo, Redis                       | 🛠               |
 | GraphQL API Gateway                 | Rejoiner                                  | 🛠               |
 
 [1]: docs/protocol-buffers.md
@@ -51,16 +52,20 @@ It demonstrates:
 
 This project uses:
 
+- [bojand/ghz](https://github.com/bojand/ghz)
 - [Docker CE](https://www.docker.com/community-edition)
-- [Go 1.11](https://golang.org/)
 - [fullstorydev/grpcurl](https://github.com/fullstorydev/grpcurl)
+- [Go 1.11](https://golang.org/)
+- [rakyll/hey](https://github.com/rakyll/hey)
 - [uber/prototool](https://github.com/uber/prototool)
 
 ### Install the CLI tools:
 
 ```console
 $ brew install go prototool
+$ curl -L https://github.com/bojand/ghz/releases/download/v0.22.0/ghz_0.22.0_Darwin_x86_64.tar.gz | tar -xvz -C /usr/local/bin/ ghz
 $ curl -L https://github.com/fullstorydev/grpcurl/releases/download/v1.1.0/grpcurl_1.1.0_osx_x86_64.tar.gz | tar -xvz -C /usr/local/bin/ grpcurl
+$ go install github.com/rakyll/hey
 $ open https://store.docker.com/search?type=edition&offering=community
 ```
 
@@ -97,6 +102,9 @@ Server: Docker Engine - Community
   Built:            Wed Nov  7 00:55:00 2018
   OS/Arch:          linux/amd64
   Experimental:     false
+
+$ ghz -v
+0.22.0
 
 $ go version
 go version go1.11.4 darwin/amd64
