@@ -3,6 +3,7 @@ package users
 import (
 	"context"
 	"fmt"
+	"math/rand"
 
 	empty "github.com/golang/protobuf/ptypes/empty"
 	widgets "github.com/nzoschke/gomesh-interface/gen/go/widgets/v2"
@@ -14,7 +15,9 @@ import (
 var _ widgets.WidgetsServer = (*Server)(nil)
 
 // Server implements the widgets/v2 interface
-type Server struct{}
+type Server struct {
+	ErrorRate int
+}
 
 // BatchGet returns a batch of Widgets by name
 func (s *Server) BatchGet(ctx context.Context, in *widgets.BatchGetRequest) (*widgets.BatchGetResponse, error) {
@@ -37,7 +40,13 @@ func (s *Server) Get(ctx context.Context, u *widgets.GetRequest) (*widgets.Widge
 }
 
 // List returns a page of Widgets
+//
+// For experimental purposes this can be configured to fail N percent of time
 func (s *Server) List(ctx context.Context, in *widgets.ListRequest) (*widgets.ListResponse, error) {
+	if rand.Intn(100)+1 <= s.ErrorRate {
+		return nil, status.Errorf(codes.Unavailable, "random error")
+	}
+
 	return &widgets.ListResponse{
 		Widgets: []*widgets.Widget{
 			&widgets.Widget{

@@ -16,12 +16,14 @@ import (
 )
 
 type config struct {
-	Port int `conf:"p" help:"Port to listen"`
+	ErrorRate int `conf:"error-rate" help:"Percent of requests to fail"`
+	Port      int `conf:"p"          help:"Port to listen"`
 }
 
 func main() {
 	config := config{
-		Port: 8001,
+		ErrorRate: 0,
+		Port:      8001,
 	}
 	conf.Load(&config)
 
@@ -46,7 +48,9 @@ func serve(config config) error {
 		),
 	)
 
-	widgets.RegisterWidgetsServer(s, &swidgets.Server{})
+	widgets.RegisterWidgetsServer(s, &swidgets.Server{
+		ErrorRate: config.ErrorRate,
+	})
 	reflection.Register(s)
 
 	l, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", config.Port))
