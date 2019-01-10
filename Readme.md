@@ -1,12 +1,18 @@
 # gomesh
 
-Building a reliable service oriented architecture is easier than ever, once you learn the gRPC framework and ecosystem of tools that interoperate around Protocol Buffer service definitions.
+Building a reliable service oriented architecture (SOA) is easier than ever, once you learn the gRPC framework and ecosystem of tools that interoperate around Protocol Buffer service definitions.
 
 This is an example SOA with all the gRPC services configured correctly and explained in depth. See [the docs folder](docs/) for detailed guides about service definitions, proxies, remote procedure calls, API gateways, data stores, observability, versioning and more.
 
 With this foundation you can skip over all the setup, and focus entirely on your business logic code.
 
 ## Motivation
+
+Mesh networking with Envoy is one of the latest advances in building a SOA. The gRPC service framework is well-suited for mesh networking due to its design, performance, error-handling and first-class support in Envoy. Go is well-suited for building gRPC services due to its performance and type safety. Check out the [Intro to Go Service Mesh with Envoy and gRPC](docs/intro-gomesh.md) for more explanation.
+
+Due to its flexibility, Envoy can be difficult to configure. This project demonstrates a solid foundation for Envoy, gRPC and Go. You can clone it and run different configurations locally with a few commands to get a feel for the architecture and its performance and observability.
+
+Then you can copy the configs into sidecars for your production services. The configs, with tweaks, have been tested in production at [Segment](https://segment.com/).
 
 It demonstrates:
 
@@ -49,6 +55,12 @@ It demonstrates:
 [20]: config/prometheus/dns-sd.yml
 
 ## Quick Start
+
+This project spans three repositories to isolate API design and definitions from generated code from service implementations.
+
+1. ([gomesh-proto](https://github.com/nzoschke/gomesh-proto)) for .proto definitions
+2. ([gomesh-interface](https://github.com/nzoschke/gomesh-interface)) for generated Go client and server interfaces
+3. ([gomesh](https://github.com/nzoschke/gomesh)) for gRPC service implementations
 
 This project uses:
 
@@ -123,7 +135,7 @@ OS/Arch:                 darwin/amd64
 
 ### Get the project
 
-We start by getting and testing the `github.com/nzoschke/gomesh`.
+We start by getting and testing `github.com/nzoschke/gomesh`.
 
 ```shell
 $ git clone https://github.com/nzoschke/gomesh.git ~/dev/gomesh
@@ -155,7 +167,7 @@ This gives us confidence in our gRPC and Go environment.
 We can pull in newer client/server interfaces with `go get`:
 
 ```shell
-$ go get github.com/nzoschke/gomesh-interface@branch
+$ go get github.com/nzoschke/gomesh-interface@master
 ```
 
 We can start all the mesh services / sidecars:
@@ -186,7 +198,7 @@ $ grpcurl -d '{"name": "orgs/myorg/users/myuser"}' -plaintext localhost:10000 go
 }
 ```
 
-We can start all the service proxy and mesh:
+We can start all the service proxy and mesh services / sidecars:
 
 ```shell
 $ make dc-up-proxy
