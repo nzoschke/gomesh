@@ -25,12 +25,12 @@ services:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   users-v2-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds-authz.yaml --service-node $$HOSTNAME --service-cluster users-v2"]
     image: envoyproxy/envoy:v1.9.0
     links:
       - users-v2:local
     ports:
-      - "9901:9901"    # map envoy admin
+      - "9900:9901"    # map envoy admin
       - "10000:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
@@ -49,7 +49,7 @@ services:
     command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
     image: envoyproxy/envoy:v1.9.0
     ports:
-      - "9902:9901"    # map envoy admin
+      - "9901:9901"    # map envoy admin
       - "10001:10000"  # map envoy ingress
     links:
       - widgets-v2:local
@@ -68,11 +68,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   xds-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds"]
     image: envoyproxy/envoy:v1.9.0
     links:
       - xds:local
     ports:
+      - "9902:9901"    # map envoy admin
       - "10002:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
