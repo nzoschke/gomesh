@@ -7,17 +7,29 @@ admin:
 staticResources:
   clusters:
   - connectTimeout: 0.250s
-    http2ProtocolOptions: {}
     loadAssignment:
-      clusterName: local
+      clusterName: local1
       endpoints:
       - lbEndpoints:
         - endpoint:
             address:
               socketAddress:
                 address: local
-                portValue: 8000
-    name: local
+                portValue: 8001  # HTTP/1 server port
+    name: local1
+    type: STRICT_DNS
+  - connectTimeout: 0.250s
+    http2ProtocolOptions: {}
+    loadAssignment:
+      clusterName: local2
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: local
+                portValue: 8000  # HTTP/2 (gRPC) server port
+    name: local2
     type: STRICT_DNS
   listeners:
   - address:
@@ -92,9 +104,14 @@ staticResources:
               name: local
               routes:
               - match:
+                  grpc: {}
                   prefix: /
                 route:
-                  cluster: local
+                  cluster: local2
+              - match:
+                  prefix: /
+                route:
+                  cluster: local1
           statPrefix: ingress_http
         name: envoy.http_connection_manager
     name: ingress
