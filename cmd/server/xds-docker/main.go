@@ -251,8 +251,8 @@ func cluster(name string, addresses []core.Address_SocketAddress) xds.Cluster {
 
 	return xds.Cluster{
 		Name:                 name,
-		Type:                 xds.Cluster_STRICT_DNS,
-		ConnectTimeout:       250 * time.Millisecond,
+		Type:                 xds.Cluster_STATIC,
+		ConnectTimeout:       2500 * time.Millisecond,
 		Http2ProtocolOptions: &core.Http2ProtocolOptions{},
 		LoadAssignment: &xds.ClusterLoadAssignment{
 			ClusterName: name,
