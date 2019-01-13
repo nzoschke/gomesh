@@ -1,0 +1,146 @@
+# This demonstrates an envoy api gateway with authz and rate limiting
+# It exposes only the gateway ports for security and to enable scaling backing services
+---
+version: "3"
+services:
+  auth-v2alpha:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: [
+      "auth-v2alpha",
+      "-hh", "auth-v2alpha-sidecar:11000",  # use auth sidecar egress
+      "-ha", "hydra-sidecar",               # route to hydra sidecar
+    ]
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  auth-v2alpha-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster auth-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - auth-v2alpha:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  hydra:
+    environment:
+      - DATABASE_URL=memory
+      - OAUTH2_ISSUER_URL=https://localhost:8000/
+      - PUBLIC_PORT=8000
+    image: oryd/hydra:v1.0.0-rc.6_oryOS.10
+    ports:
+      - 4445:4445  # map hydra admin
+
+  hydra-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster hydra"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - hydra:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  prometheus:
+    image: prom/prometheus:v2.6.0
+    ports:
+      - 9090:9090
+    volumes:
+      - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
+
+  proxy:
+    command: ["sh", "-c", "envoy -c /etc/envoy/gateway-xds.yaml --service-node $$HOSTNAME --service-cluster proxy -l trace"]
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-proxy
+    depends_on:
+      - ratelimit-sidecar
+    ports:
+      - "80:10000"   # map envoy ingress
+      - "9901:9901"  # map envoy admin
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  users-v2:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: [
+      "users-v2",
+      "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
+      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar
+    ]
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  users-v2-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster users-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - users-v2:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  ratelimit:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-ratelimit
+    environment:
+      - USE_STATSD=false
+      - LOG_LEVEL=DEBUG
+      - REDIS_SOCKET_TYPE=tcp
+      - REDIS_URL=redis:6379
+      - RUNTIME_ROOT=/etc
+      - RUNTIME_SUBDIRECTORY=ratelimit
+      - GRPC_PORT=8000
+    ports:
+      - 6070:6070  # map debug port
+    volumes:
+      - ./config/ratelimit/ratelimit.yaml:/etc/ratelimit/config/ratelimit.yaml
+    links:
+      - redis
+
+  ratelimit-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - ratelimit:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  redis:
+    image: redis:5
+
+  widgets-v2:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: ["widgets-v2", "-p", "8000"]
+    environment:
+      - WIDGETS_V2_ERROR_RATE
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  widgets-v2-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - widgets-v2:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  xds:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: xds-docker
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  xds-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds-v2"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - xds:local
+    volumes:
+      - ./config/envoy:/etc/envoy
