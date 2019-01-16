@@ -1,0 +1,84 @@
+# sidecar for ory/hydra -- https://www.ory.sh/docs/next/hydra/production
+# listens to ingress on port 10000
+# route whitelist of admin endpoints to admin port 4445
+# route everything else to public port 4444
+---
+admin:
+  accessLogPath: /dev/stdout
+  address:
+    socketAddress:
+      address: 0.0.0.0
+      portValue: 9901
+staticResources:
+  clusters:
+  - connectTimeout: 0.250s
+    loadAssignment:
+      clusterName: local_public
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: local
+                portValue: 4444  # HTTP/1 public port
+    name: local_public
+    type: STRICT_DNS
+  - connectTimeout: 0.250s
+    loadAssignment:
+      clusterName: local_admin
+      endpoints:
+      - lbEndpoints:
+        - endpoint:
+            address:
+              socketAddress:
+                address: local
+                portValue: 4445  # HTTP/1 admin port
+    name: local_admin
+    type: STRICT_DNS
+  listeners:
+  - address:
+      socketAddress:
+        address: 0.0.0.0
+        portValue: 10000
+    filterChains:
+    - filters:
+      - config:
+          accessLog:
+          - config:
+              format: >
+                listener=ingress start_time=%START_TIME%
+                req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
+                response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
+                bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
+                req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
+                req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)%
+                req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
+                resp_grpc_status=%RESP(grpc-status)% resp_grpc_message="%RESP(grpc-message)%"
+                trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
+              path: /dev/stdout
+            name: envoy.file_access_log
+          httpFilters:
+          - name: envoy.router
+          routeConfig:
+            name: local
+            virtualHosts:
+            - domains:
+              - '*'
+              name: local
+              routes:
+              - match:
+                  path: /clients
+                route:
+                  cluster: local_admin
+              - match:
+                  path: /oauth2/introspect
+                route:
+                  cluster: local_admin
+              - match:
+                  prefix: /
+                route:
+                  cluster: local_public
+          statPrefix: ingress_http
+        name: envoy.http_connection_manager
+    name: ingress

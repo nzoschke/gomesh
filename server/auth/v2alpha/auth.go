@@ -11,6 +11,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/envoy/type"
 	"github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
+	"github.com/ory/hydra/sdk/go/hydra"
 )
 
 // Interface assertion
@@ -18,31 +19,58 @@ var _ auth.AuthorizationServer = (*Server)(nil)
 
 // Server implements the auth/v2alpha interface
 type Server struct {
+	Hydra *hydra.CodeGenSDK
 }
 
 // Check does an auth header check and returns a 200 on auth, non-200 otherwise
 func (s *Server) Check(ctx context.Context, in *auth.CheckRequest) (*auth.CheckResponse, error) {
 	h := in.Attributes.Request.Http.Headers["authorization"]
 	if h == "" {
-		return deniedResponse("No auth header present", int(envoy_type.StatusCode_Unauthorized))
+		return responseDenied("No auth header present", int(envoy_type.StatusCode_Unauthorized))
 	}
 
 	auth := strings.SplitN(h, " ", 2)
-	if len(auth) != 2 || auth[0] != "Basic" {
-		return deniedResponse("Invalid auth header", int(envoy_type.StatusCode_Unauthorized))
+
+	switch auth[0] {
+	case "Basic":
+		return s.basicCheck(auth[1])
+	case "Bearer":
+		return s.bearerCheck(auth[1])
+	default:
+		return responseDenied("Invalid auth header", int(envoy_type.StatusCode_Unauthorized))
 	}
-
-	payload, _ := base64.StdEncoding.DecodeString(auth[1])
-	parts := strings.SplitN(string(payload), ":", 2)
-
-	if len(parts) != 2 || !validate(parts[0], parts[1]) {
-		return deniedResponse("Invalid basic credentials", int(envoy_type.StatusCode_Unauthorized))
-	}
-
-	return okResponse(fmt.Sprintf("user/%s", parts[0]))
 }
 
-func okResponse(subject string) (*auth.CheckResponse, error) {
+func (s *Server) basicCheck(token string) (*auth.CheckResponse, error) {
+	payload, _ := base64.StdEncoding.DecodeString(token)
+	parts := strings.SplitN(string(payload), ":", 2)
+
+	if len(parts) != 2 || !basicValidate(parts[0], parts[1]) {
+		return responseDenied("Invalid basic credentials", int(envoy_type.StatusCode_Unauthorized))
+	}
+
+	return responseOk(fmt.Sprintf("users/%s", parts[0]))
+}
+
+// TODO: implement real password checking
+func basicValidate(username, password string) bool {
+	return true
+}
+
+func (s *Server) bearerCheck(token string) (*auth.CheckResponse, error) {
+	i, _, err := s.Hydra.IntrospectOAuth2Token(token, "")
+	if err != nil {
+		return responseDenied(err.Error(), int(envoy_type.StatusCode_Unauthorized))
+	}
+
+	if !i.Active {
+		return responseDenied("Inactive bearer token", int(envoy_type.StatusCode_Unauthorized))
+	}
+
+	return responseOk(fmt.Sprintf("clients/%s", i.ClientId))
+}
+
+func responseOk(subject string) (*auth.CheckResponse, error) {
 	return &auth.CheckResponse{
 		HttpResponse: &auth.CheckResponse_OkResponse{
 			OkResponse: &auth.OkHttpResponse{
@@ -65,7 +93,7 @@ func okResponse(subject string) (*auth.CheckResponse, error) {
 	}, nil
 }
 
-func deniedResponse(body string, status int) (*auth.CheckResponse, error) {
+func responseDenied(body string, status int) (*auth.CheckResponse, error) {
 	return &auth.CheckResponse{
 		HttpResponse: &auth.CheckResponse_DeniedResponse{
 			DeniedResponse: &auth.DeniedHttpResponse{
@@ -79,8 +107,4 @@ func deniedResponse(body string, status int) (*auth.CheckResponse, error) {
 			Code: int32(rpc.UNAUTHENTICATED),
 		},
 	}, nil
-}
-
-func validate(username, password string) bool {
-	return true
 }

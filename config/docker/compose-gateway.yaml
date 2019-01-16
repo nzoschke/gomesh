@@ -9,8 +9,9 @@ services:
       dockerfile: config/docker/Dockerfile
     command: [
       "auth-v2alpha",
-      "-hh", "auth-v2alpha-sidecar:11000",  # use auth sidecar egress
-      "-ha", "hydra-sidecar",               # route to hydra sidecar
+      "-hha", "auth-v2alpha-sidecar:11000",  # use auth-v2alpha sidecar egress
+      "-hhp", "auth-v2alpha-sidecar:11000",  # use auth-v2alpha sidecar egress
+      "-ha",  "hydra-sidecar",               # route to hydra sidecar
     ]
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
@@ -24,16 +25,16 @@ services:
       - ./config/envoy:/etc/envoy
 
   hydra:
+    command: serve all --dangerous-force-http
     environment:
       - DATABASE_URL=memory
-      - OAUTH2_ISSUER_URL=https://localhost:8000/
-      - PUBLIC_PORT=8000
     image: oryd/hydra:v1.0.0-rc.6_oryOS.10
     ports:
+      - 4444:4444  # map hydra public
       - 4445:4445  # map hydra admin
 
   hydra-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster hydra"]
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-hydra.yaml --service-node $$HOSTNAME --service-cluster hydra"]
     image: envoyproxy/envoy:v1.9.0
     links:
       - hydra:local
@@ -48,7 +49,7 @@ services:
       - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
 
   proxy:
-    command: ["sh", "-c", "envoy -c /etc/envoy/gateway-xds.yaml --service-node $$HOSTNAME --service-cluster proxy -l trace"]
+    command: ["sh", "-c", "envoy -c /etc/envoy/gateway-xds.yaml --service-node $$HOSTNAME --service-cluster proxy"]
     build:
       context: .
       dockerfile: config/docker/Dockerfile-proxy
@@ -86,7 +87,7 @@ services:
       dockerfile: config/docker/Dockerfile-ratelimit
     environment:
       - USE_STATSD=false
-      - LOG_LEVEL=DEBUG
+      # - LOG_LEVEL=DEBUG
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/etc
