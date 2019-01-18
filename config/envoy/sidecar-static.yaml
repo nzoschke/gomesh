@@ -1,0 +1,145 @@
+# Envoy Sidecar
+# - Static Cluster to local sidecar gRPC port 8000
+# - Static Cluster to local sidecar HTTP port 8001
+---
+admin:
+  access_log_path: /dev/stdout
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+static_resources:
+  clusters:
+    - connect_timeout: 0.250s
+      load_assignment:
+        cluster_name: local1
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: local
+                      port_value: 8001  # HTTP/1 server port
+      name: local1
+      type: STRICT_DNS
+
+    - connect_timeout: 0.250s
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: local2
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: local
+                      port_value: 8000  # HTTP/2 (gRPC) server port
+      name: local2
+      type: STRICT_DNS
+
+  listeners:
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 11000
+      filter_chains:
+        - filters:
+            - config:
+                access_log:
+                  - config:
+                      format: >
+                        listener=egress start_time=%START_TIME%
+                        req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
+                        response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
+                        bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                        resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
+                        req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
+                        req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)% req_uber_trace_id=%REQ(UBER-TRACE-ID)%
+                        req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
+                        resp_grpc_status=%RESP(grpc-status) %resp_grpc_message="%RESP(grpc-message)%"
+                        trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
+                      path: /dev/stdout
+                    name: envoy.file_access_log
+
+                http_filters:
+                  - name: envoy.router
+
+                route_config:
+                  name: local
+                  virtual_hosts:
+                    - domains:
+                        - "*"
+                      name: local
+                      routes:
+                        - match:
+                            prefix: /
+                          route:
+                            cluster_header: :authority
+                            retry_policy:
+                              retry_on: cancelled,deadline-exceeded,internal,resource-exhausted,unavailable
+
+                stat_prefix: egress_http
+              name: envoy.http_connection_manager
+      name: egress
+
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - filters:
+            - config:
+                access_log:
+                  - config:
+                      format: >
+                        listener=ingress start_time=%START_TIME%
+                        req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
+                        response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
+                        bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                        resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
+                        req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
+                        req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)% req_uber_trace_id=%REQ(UBER-TRACE-ID)%
+                        req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
+                        resp_grpc_status=%RESP(grpc-status)% resp_grpc_message="%RESP(grpc-message)%"
+                        trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
+                      path: /dev/stdout
+                    name: envoy.file_access_log
+
+                http_filters:
+                  - name: envoy.grpc_http1_bridge
+                  - name: envoy.grpc_web
+                  - name: envoy.router
+
+                route_config:
+                  name: local
+                  virtual_hosts:
+                    - domains:
+                        - '*'
+                      name: local
+                      routes:
+                        - match:
+                            grpc: {}
+                            prefix: /
+                          route:
+                            cluster: local2
+
+                        - match:
+                            prefix: /
+                          route:
+                            cluster: local1
+
+                stat_prefix: ingress_http
+              name: envoy.http_connection_manager
+      name: ingress
+
+stats_config:
+  stats_tags:
+    - regex: '^cluster(?=\.).*?\.grpc(-(.*?))\.'                          # web
+      tag_name: envoy.grpc_format
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((.*)\.(?:.*)\.)'         # myservice.widgets.v0.Widgets (greedy)
+      tag_name: envoy.grpc_service
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((?:.*)\.(.*)\.)'         # Get
+      tag_name: envoy.grpc_method
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?(\.(?:.*)\.(?:.*)\.(\d+))'  # 0 (and remove leading dot)
+      tag_name: envoy.grpc_code
