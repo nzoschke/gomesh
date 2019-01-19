@@ -1,4 +1,4 @@
-CMDS = $(shell find cmd/{client,server} -type d -mindepth 1)
+CMDS = $(shell find cmd/* -mindepth 1 -type d)
 BINS = $(CMDS:cmd/%=bin/linux_amd64/%)
 bins: $(BINS)
 $(BINS): bin/linux_amd64/%: cmd/%/main.go $(shell find . -name '*.go')
@@ -20,3 +20,10 @@ dc-up-gateway:
 dc-up-mesh:
 	make -j bins
 	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up --abort-on-container-exit
+
+workflow:
+	docker build . -f .github/action/make/Dockerfile -t make
+	docker run -v $(PWD):/github/workspace make bins
+	docker build . -f .github/action/yamllint/Dockerfile -t yamllint
+	docker run -v $(PWD):/github/workspace yamllint -c /etc/yamllint.yaml config/*/*.yaml
+	#docker build . -f .github/action/yamllint/Dockerfile -t yamllint
