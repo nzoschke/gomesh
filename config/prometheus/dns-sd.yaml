@@ -8,34 +8,34 @@ scrape_configs:
       - targets:
           - localhost:9090
 
-  - job_name: proxy
-    metrics_path: /stats/prometheus
-    dns_sd_configs:
+  - dns_sd_configs:
       - names:
           - proxy
         port: 9901
         type: A
-
-  - job_name: users-v2-sidecar
+    job_name: proxy
     metrics_path: /stats/prometheus
-    dns_sd_configs:
+
+  - dns_sd_configs:
       - names:
           - users-v2-sidecar
         port: 9901
         type: A
-
-  - job_name: widgets-v2-sidecar
+    job_name: users-v2-sidecar
     metrics_path: /stats/prometheus
-    dns_sd_configs:
+
+  - dns_sd_configs:
       - names:
           - widgets-v2-sidecar
         port: 9901
         type: A
-
-  - job_name: xds-sidecar
+    job_name: widgets-v2-sidecar
     metrics_path: /stats/prometheus
-    dns_sd_configs:
+
+  - dns_sd_configs:
       - names:
           - xds-sidecar
         port: 9901
         type: A
+    job_name: xds-sidecar
+    metrics_path: /stats/prometheus

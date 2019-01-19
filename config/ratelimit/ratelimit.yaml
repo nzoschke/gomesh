@@ -1,4 +1,4 @@
-domain: gateway
+---
 descriptors:
   - key: authenticated
     rate_limit:
@@ -8,5 +8,7 @@ descriptors:
 
   - key: remote_address
     rate_limit:
-      unit: minute
       requests_per_unit: 60
+      unit: minute
+
+domain: gateway

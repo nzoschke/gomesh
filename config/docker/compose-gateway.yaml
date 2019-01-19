@@ -64,7 +64,7 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/dns-sd.yaml:/etc/prometheus/prometheus.yml
 
   proxy:
     build:
