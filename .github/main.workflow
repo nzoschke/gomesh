@@ -10,5 +10,5 @@ action "make bins" {
 
 action "yamllint" {
   uses = "./.github/action/yamllint"
-  args = "config/*/*.yaml"
+  args = "config"
 }
