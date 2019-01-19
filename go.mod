@@ -1,20 +1,18 @@
 module github.com/nzoschke/gomesh
 
 require (
-	github.com/Microsoft/go-winio v0.4.11 // indirect
+	github.com/avast/retry-go v2.1.0+incompatible
 	github.com/docker/distribution v2.7.0+incompatible // indirect
 	github.com/docker/docker v1.13.1
-	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/docker/go-units v0.3.3 // indirect
 	github.com/envoyproxy/go-control-plane v0.6.6
-	github.com/gogo/googleapis v1.1.0 // indirect
+	github.com/gogo/googleapis v1.1.0
 	github.com/gogo/protobuf v1.2.0
 	github.com/golang/protobuf v1.2.0
-	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.0.1-0.20190104160321-4832df01553a
 	github.com/grpc-ecosystem/grpc-gateway v1.6.3
 	github.com/lyft/protoc-gen-validate v0.0.12 // indirect
 	github.com/nzoschke/gomesh-interface v0.0.0-20190105205516-47a6d4f9ad23
-	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
+	github.com/ory/hydra v0.0.0-20181218121201-bdb6634e3d87
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/conf v1.0.0
@@ -22,6 +20,7 @@ require (
 	github.com/segmentio/objconv v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.3.0
 	github.com/stretchr/testify v1.3.0
+	golang.org/x/oauth2 v0.0.0-20181003184128-c57b0facaced
 	google.golang.org/grpc v1.17.0
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/mold.v2 v2.2.0 // indirect
