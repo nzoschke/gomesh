@@ -5,7 +5,7 @@ workflow "new workflow" {
 
 action "make bins" {
   uses = "docker://golang:1.11"
-  runs = "make bins"
+  runs = "make -C $GITHUB_WORKSPACE bins"
 }
 
 action "yamllint" {
