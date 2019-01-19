@@ -15,13 +15,13 @@ import (
 
 type config struct {
 	Port      int    `conf:"p" help:"Port to listen"`
-	UsersAddr string `conf:"w" help:"Widgets service address to dial"`
+	UsersAddr string `conf:"w" help:"Users service address to dial"`
 }
 
 func main() {
 	config := config{
 		Port:      9000,
-		UsersAddr: "0.0.0.0:8000",
+		UsersAddr: "0.0.0.0:8002",
 	}
 	conf.Load(&config)
 

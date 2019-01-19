@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 
@@ -10,6 +11,7 @@ import (
 	users "github.com/nzoschke/gomesh-interface/gen/go/users/v2"
 	widgets "github.com/nzoschke/gomesh-interface/gen/go/widgets/v2"
 	susers "github.com/nzoschke/gomesh/server/users/v2"
+	"github.com/nzoschke/gomesh/internal/metadata"
 	"github.com/segmentio/conf"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -24,8 +26,8 @@ type config struct {
 
 func main() {
 	config := config{
-		Port:             8000,
-		WidgetsHost:      "0.0.0.0:8001",
+		Port:             8002,
+		WidgetsHost:      "0.0.0.0:9002",
 		WidgetsAuthority: "widgets-v2",
 	}
 	conf.Load(&config)
@@ -47,7 +49,16 @@ func serve(config config) error {
 		grpc.WithAuthority(config.WidgetsAuthority),
 		grpc.WithInsecure(),
 		grpc.WithUnaryInterceptor(
-			grpc_logrus.UnaryClientInterceptor(logEntry),
+			grpc_middleware.ChainUnaryClient(
+				metadata.TraceIDForwarder(),
+				grpc_logrus.UnaryClientInterceptor(logEntry),
+				grpc_logrus.PayloadUnaryClientInterceptor(
+					logEntry,
+					func(ctx context.Context, methodFullName string) bool {
+						return true
+					},
+				),
+			),
 		),
 	)
 	if err != nil {
@@ -60,6 +71,12 @@ func serve(config config) error {
 		grpc.UnaryInterceptor(
 			grpc_middleware.ChainUnaryServer(
 				grpc_logrus.UnaryServerInterceptor(logEntry),
+				grpc_logrus.PayloadUnaryServerInterceptor(
+					logEntry,
+					func(ctx context.Context, methodFullName string, servingObject interface{}) bool {
+						return true
+					},
+				),
 				grpc_validator.UnaryServerInterceptor(),
 			),
 		),

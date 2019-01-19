@@ -35,7 +35,7 @@ type Server struct {
 
 func main() {
 	config := config{
-		Port: 8000,
+		Port: 8002,
 	}
 	conf.Load(&config)
 

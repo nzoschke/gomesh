@@ -26,12 +26,12 @@ func serve() error {
 	users.RegisterUsersServer(s, &Server{})
 	reflection.Register(s)
 
-	l, err := net.Listen("tcp", "0.0.0.0:8000")
+	l, err := net.Listen("tcp", "0.0.0.0:8002")
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("listening on :8000")
+	fmt.Println("listening on :8002")
 	return s.Serve(l)
 }
 

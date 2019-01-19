@@ -7,8 +7,8 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	users "github.com/nzoschke/gomesh-interface/gen/go/users/v2"
 	widgets "github.com/nzoschke/gomesh-interface/gen/go/widgets/v2"
+	"github.com/nzoschke/gomesh/internal/metadata"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
@@ -37,7 +37,7 @@ func (s *Server) Delete(ctx context.Context, in *users.DeleteRequest) (*empty.Em
 
 // Get returns a User with their Widgets
 func (s *Server) Get(ctx context.Context, u *users.GetRequest) (*users.User, error) {
-	subj, _ := mdGet(ctx, "x-subject-id")
+	subj, _ := metadata.Get(ctx, "x-subject-id")
 	fmt.Printf("users.Get x-subject-id=%s\n", subj)
 
 	r, err := s.WidgetsClient.List(ctx, &widgets.ListRequest{
@@ -61,18 +61,4 @@ func (s *Server) List(ctx context.Context, in *users.ListRequest) (*users.ListRe
 // Update updates a User
 func (s *Server) Update(ctx context.Context, in *users.UpdateRequest) (*users.User, error) {
 	return nil, status.Error(codes.Unimplemented, "unimplemented")
-}
-
-func mdGet(ctx context.Context, key string) (string, bool) {
-	md, ok := metadata.FromIncomingContext(ctx)
-	if !ok {
-		return "", ok
-	}
-
-	vs := md.Get(key)
-	if len(vs) == 0 {
-		return "", false
-	}
-
-	return vs[0], true
 }

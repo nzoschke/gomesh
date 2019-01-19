@@ -23,7 +23,7 @@ type config struct {
 func main() {
 	config := config{
 		ErrorRate: 0,
-		Port:      8001,
+		Port:      8002,
 	}
 	conf.Load(&config)
 

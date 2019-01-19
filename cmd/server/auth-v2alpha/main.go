@@ -30,21 +30,11 @@ type config struct {
 	HydraHostPublic string `conf:"hhp" help:"Hydra service public host to dial"`
 }
 
-type transport struct {
-	Authority string
-	Transport *http.Transport
-}
-
-func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Host = t.Authority
-	return t.Transport.RoundTrip(req)
-}
-
 func main() {
 	config := config{
 		ClientID:        "my-client",
 		ClientSecret:    "secret",
-		Port:            8000,
+		Port:            8002,
 		HydraHostAdmin:  "0.0.0.0:4445",
 		HydraHostPublic: "0.0.0.0:4444",
 		HydraAuthority:  "hydra",
@@ -63,10 +53,11 @@ func serve(config config) error {
 
 	logger.Debugf("Config: %+v", config)
 
-	http.DefaultTransport = &transport{
+	t := &sauth.Transport{
 		Authority: config.HydraAuthority,
 		Transport: http.DefaultTransport.(*http.Transport),
 	}
+	http.DefaultTransport = t
 
 	h, err := hydra.NewSDK(&hydra.Configuration{
 		AdminURL:     fmt.Sprintf("http://%s", config.HydraHostAdmin),
@@ -99,7 +90,8 @@ func serve(config config) error {
 	)
 
 	auth.RegisterAuthorizationServer(s, &sauth.Server{
-		Hydra: h,
+		Hydra:     h,
+		Transport: t,
 	})
 	reflection.Register(s)
 
