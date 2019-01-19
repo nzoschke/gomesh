@@ -13,8 +13,8 @@ import (
 	"github.com/envoyproxy/go-control-plane/envoy/type"
 	"github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
-	"github.com/ory/hydra/sdk/go/hydra"
 	"github.com/nzoschke/gomesh/internal/metadata"
+	"github.com/ory/hydra/sdk/go/hydra"
 )
 
 // Interface assertion
