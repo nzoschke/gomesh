@@ -22,8 +22,10 @@ dc-up-mesh:
 	docker-compose -f config/docker/compose-mesh.yaml --project-directory . up --abort-on-container-exit
 
 workflow:
-	docker build . -f .github/action/make/Dockerfile -t make
-	docker run -v $(PWD):/github/workspace make bins
-	docker build . -f .github/action/yamllint/Dockerfile -t yamllint
-	docker run -v $(PWD):/github/workspace yamllint -c /etc/yamllint.yaml config/*/*.yaml
-	#docker build . -f .github/action/yamllint/Dockerfile -t yamllint
+	docker build . -f .github/action/go/Dockerfile        -t action-go
+	docker build . -f .github/action/yamllint/Dockerfile  -t action-yamllint
+	docker build . -f .github/action/prototool/Dockerfile -t action-prototool
+
+	docker run -v $(PWD):/github/workspace action-go        .github/golint.sh
+	docker run -v $(PWD):/github/workspace action-yamllint  .github/yamllint.sh
+	docker run -v $(PWD):/github/workspace action-prototool .github/pbpush.sh

@@ -1,0 +1,136 @@
+syntax = "proto3";
+
+package gomesh.widgets.v2;
+
+option go_package = "v2pb";
+option java_multiple_files = true;
+option java_outer_classname = "WidgetsProto";
+option java_package = "com.gomesh.widgets.v2";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+service Widgets {
+  // Get Widget
+  //
+  // Takes Widget name (with parent User) in path
+  rpc Get(GetRequest) returns (Widget) {
+    option (google.api.http) = {
+      get: "/v2/{name=users/*/widgets/*}"
+    };
+  }
+  // Create Widget
+  //
+  // Takes parent User in path and Widget in body
+  rpc Create(CreateRequest) returns (Widget) {
+    option (google.api.http) = {
+      post: "/v2/{parent=users/*}/widgets"
+      body: "*"
+    };
+  }
+  // Update Widget
+  //
+  // Takes Widget name (with parent User) in path, and Widget in body
+  rpc Update(UpdateRequest) returns (Widget) {
+    option (google.api.http) = {
+      patch: "/v2/{widget.name=users/*/widgets/*}"
+      body: "*"
+    };
+  }
+  // Delete Widget
+  //
+  // Takes Widget name (with parent User) in path
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v2/{name=users/*/widgets/*}"
+    };
+  }
+  // List Widgets
+  //
+  // Takes parent User in path
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/v2/{parent=users/*}/widgets"
+    };
+  }
+  // BatchGet Widgets
+  //
+  // Takes parent User in path and Widget names in query string
+  rpc BatchGet(BatchGetRequest) returns (BatchGetResponse) {
+    option (google.api.http) = {
+      get: "/v2/{parent=users/*}/widgets:batchGet"
+    };
+  }
+}
+
+message Widget {
+  string parent = 1;
+  string name = 2;
+  string display_name = 3;
+  enum Color {
+    WIDGET_COLOR_INVALID = 0;
+    WIDGET_COLOR_RED = 1;
+    WIDGET_COLOR_GREEN = 2;
+    WIDGET_COLOR_BLUE = 3;
+  }
+  Color color = 4;
+  google.protobuf.Timestamp create_time = 5;
+}
+
+message GetRequest {
+  string name = 1 [
+    (validate.rules).string = {
+      pattern: "^users/[a-z0-9._-]+/widgets/[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
+}
+
+message CreateRequest {
+  string parent = 1 [
+    (validate.rules).string = {
+      pattern: "^users/[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
+  string id = 2 [
+    (validate.rules).string = {
+      pattern: "^[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
+  Widget widget = 3 [(validate.rules).message.required = true];
+}
+
+message UpdateRequest {
+  Widget widget = 1 [(validate.rules).message.required = true];
+  google.protobuf.FieldMask update_mask = 2 [(validate.rules).message.required = true];
+}
+
+message DeleteRequest {
+  string name = 1;
+}
+
+message ListRequest {
+  string parent = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListResponse {
+  repeated Widget widgets = 1;
+  string next_page_token = 2;
+  int32 total_size = 3;
+}
+
+message BatchGetRequest {
+  string parent = 1;
+  repeated string names = 2;
+}
+
+message BatchGetResponse {
+  repeated Widget widgets = 1;
+}
