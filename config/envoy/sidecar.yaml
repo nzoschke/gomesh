@@ -1,7 +1,7 @@
 # Envoy Sidecar with XDS
 # - Dynamic Cluster Discovery
-# - Static Cluster to local sidecar gRPC port 8000
-# - Static Cluster to local sidecar HTTP port 8001
+# - Static Cluster to local sidecar HTTP/1 port 8001
+# - Static Cluster to local sidecar HTTP/2 (gRPC) port 8000
 # Use `envoy.sh` to template SERVICE and HOSTNAME
 ---
 admin:
@@ -48,7 +48,7 @@ static_resources:
                   address:
                     socket_address:
                       address: local
-                      port_value: 8000  # HTTP/2 (gRPC) server port
+                      port_value: 8002  # HTTP/2 (gRPC) server port
       name: local2
       type: STRICT_DNS
 

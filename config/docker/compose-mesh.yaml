@@ -1,15 +1,7 @@
 # This demonstrates an envoy service mesh with sidecars, service discovery, and routing by authority header
 # It exposes all ports for direct introspection
 ---
-version: "3"
 services:
-  prometheus:
-    image: prom/prometheus:v2.6.0
-    ports:
-      - 9090:9090
-    volumes:
-      - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
-
   users-v2:
     build:
       context: .
@@ -25,8 +17,10 @@ services:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   users-v2-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds-authz.yaml --service-node $$HOSTNAME --service-cluster users-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar-xds.yaml", "users-v2"]
     links:
       - users-v2:local
     ports:
@@ -46,13 +40,15 @@ services:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   widgets-v2-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar-xds.yaml", "widgets-v2"]
+    links:
+      - widgets-v2:local
     ports:
       - "9901:9901"    # map envoy admin
       - "10001:10000"  # map envoy ingress
-    links:
-      - widgets-v2:local
     volumes:
       - ./config/envoy:/etc/envoy
 
@@ -68,7 +64,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   xds-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds"]
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-static.yaml --service-node $$HOSTNAME --service-cluster xds"]
     image: envoyproxy/envoy:v1.9.0
     links:
       - xds:local
@@ -77,3 +73,5 @@ services:
       - "10002:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
+
+version: "3"

@@ -1,7 +1,6 @@
 # This demonstrates an envoy api gateway with authz and rate limiting
 # It exposes only the gateway ports for security and to enable scaling backing services
 ---
-version: "3"
 services:
   auth-v2alpha:
     build:
@@ -11,14 +10,16 @@ services:
       "auth-v2alpha",
       "-hha", "auth-v2alpha-sidecar:11000",  # use auth-v2alpha sidecar egress
       "-hhp", "auth-v2alpha-sidecar:11000",  # use auth-v2alpha sidecar egress
-      "-ha",  "hydra-sidecar",               # route to hydra sidecar
+      "-ha", "hydra-sidecar"                 # route to hydra sidecar
     ]
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   auth-v2alpha-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster auth-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "auth-v2alpha"]
     links:
       - auth-v2alpha:local
     volumes:
@@ -26,20 +27,37 @@ services:
 
   hydra:
     command: serve all --dangerous-force-http
+    depends_on:
+      - jaeger
     environment:
       - DATABASE_URL=memory
+      - TRACING_PROVIDER=jaeger
+      - TRACING_PROVIDER_JAEGER_SAMPLING_SERVER_URL=http://jaeger:5778/sampling
+      - TRACING_PROVIDER_JAEGER_LOCAL_AGENT_ADDRESS=jaeger:6831
+      - TRACING_PROVIDER_JAEGER_SAMPLING_TYPE=const
+      - TRACING_PROVIDER_JAEGER_SAMPLING_VALUE=1
     image: oryd/hydra:v1.0.0-rc.6_oryOS.10
     ports:
       - 4444:4444  # map hydra public
       - 4445:4445  # map hydra admin
 
   hydra-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-hydra.yaml --service-node $$HOSTNAME --service-cluster hydra"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar-hydra.yaml", "hydra"]
     links:
       - hydra:local
     volumes:
       - ./config/envoy:/etc/envoy
+
+  jaeger:
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    image: jaegertracing/all-in-one:1.8.2
+    ports:
+      - "9411:9411"    # map collection
+      - "16686:16686"  # map admin
 
   prometheus:
     image: prom/prometheus:v2.6.0
@@ -49,35 +67,15 @@ services:
       - ./config/prometheus/dns-sd.yml:/etc/prometheus/prometheus.yml
 
   proxy:
-    command: ["sh", "-c", "envoy -c /etc/envoy/gateway-xds.yaml --service-node $$HOSTNAME --service-cluster proxy"]
     build:
       context: .
       dockerfile: config/docker/Dockerfile-proxy
+    command: ["envoy.sh", "/etc/envoy/gateway.yaml", "proxy"]
     depends_on:
       - ratelimit-sidecar
     ports:
       - "80:10000"   # map envoy ingress
       - "9901:9901"  # map envoy admin
-    volumes:
-      - ./config/envoy:/etc/envoy
-
-  users-v2:
-    build:
-      context: .
-      dockerfile: config/docker/Dockerfile
-    command: [
-      "users-v2",
-      "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
-      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar
-    ]
-    volumes:
-      - ./bin/linux_amd64/server:/usr/local/sbin
-
-  users-v2-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster users-v2"]
-    image: envoyproxy/envoy:v1.9.0
-    links:
-      - users-v2:local
     volumes:
       - ./config/envoy:/etc/envoy
 
@@ -92,17 +90,19 @@ services:
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/etc
       - RUNTIME_SUBDIRECTORY=ratelimit
-      - GRPC_PORT=8000
+      - GRPC_PORT=8002
+    links:
+      - redis
     ports:
       - 6070:6070  # map debug port
     volumes:
       - ./config/ratelimit/ratelimit.yaml:/etc/ratelimit/config/ratelimit.yaml
-    links:
-      - redis
 
   ratelimit-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "ratelimit"]
     links:
       - ratelimit:local
     volumes:
@@ -111,19 +111,43 @@ services:
   redis:
     image: redis:5
 
+  users-v2:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: [
+      "users-v2",
+      "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
+      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar
+    ]
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  users-v2-sidecar:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "users-v2"]
+    links:
+      - users-v2:local
+    volumes:
+      - ./config/envoy:/etc/envoy
+
   widgets-v2:
     build:
       context: .
       dockerfile: config/docker/Dockerfile
-    command: ["widgets-v2", "-p", "8000"]
+    command: ["widgets-v2"]
     environment:
       - WIDGETS_V2_ERROR_RATE
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   widgets-v2-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-xds.yaml --service-node $$HOSTNAME --service-cluster widgets-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "widgets-v2"]
     links:
       - widgets-v2:local
     volumes:
@@ -139,9 +163,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   xds-sidecar:
-    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar.yaml --service-node $$HOSTNAME --service-cluster xds-v2"]
-    image: envoyproxy/envoy:v1.9.0
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-static.yaml --service-node $$HOSTNAME --service-cluster xds-v2"]
     links:
       - xds:local
     volumes:
       - ./config/envoy:/etc/envoy
+
+version: "3"
