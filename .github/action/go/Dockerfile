@@ -1,4 +1,3 @@
 FROM golang:1.11
-
 WORKDIR /github/workspace
-ENTRYPOINT ["make"]
+RUN go get -u golang.org/x/lint/golint

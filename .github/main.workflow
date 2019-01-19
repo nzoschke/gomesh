@@ -1,14 +1,20 @@
 workflow "new workflow" {
   on = "push"
-  resolves = ["make bins", "yamllint"]
+  resolves = ["golint", "yamllint", "pbpush"]
 }
 
-action "make bins" {
-  uses = "./.github/action/make"
-  args = "bins"
+action "golint" {
+  uses = "./.github/action/go"
+  runs = ".github/golint.sh"
+}
+
+action "pbpush" {
+  uses = "./.github/action/prototool"
+  runs = ".github/pbpush.sh"
+  secrets = ["PUSH_TOKEN"]
 }
 
 action "yamllint" {
   uses = "./.github/action/yamllint"
-  args = "config"
+  runs = ".github/yamllint.sh"
 }
