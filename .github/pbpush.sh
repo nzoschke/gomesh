@@ -1,5 +1,7 @@
 #!/bin/bash
 set -x
+
+MSG=$(git log -1 --pretty=%B)
 STATUS=0
 
 # lint protos
@@ -27,5 +29,5 @@ git add -f .
 # push changes
 git config user.email "gen@example.com"
 git config user.name  "gen"
-git commit -m "gen ${GITHUB_SHA:0:7}"
+git commit -m "$MSG"
 git push -f origin HEAD:${GITHUB_REF}

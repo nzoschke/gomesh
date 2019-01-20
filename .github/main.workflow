@@ -1,7 +1,18 @@
-workflow "new workflow" {
+workflow "go" {
   on = "push"
-  resolves = ["golint", "yamllint", "pbpush"]
+  resolves = ["golint"]
 }
+
+workflow "pb" {
+  on = "push"
+  resolves = ["pbpush"]
+}
+
+workflow "yaml" {
+  on = "push"
+  resolves = ["yamllint"]
+}
+
 
 action "golint" {
   uses = "./.github/action/go"
