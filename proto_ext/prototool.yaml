@@ -1,0 +1,16 @@
+# generate vendor js and ts files
+---
+generate:
+  plugins:
+    - flags: binary,import_style=commonjs
+      name: js
+      output: ../gen/js
+
+    - flags: service=true
+      name: ts
+      output: ../gen/js
+
+protoc:
+  includes:
+    - third_party/googleapis
+  version: 3.6.1

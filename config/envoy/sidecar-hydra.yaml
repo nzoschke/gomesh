@@ -1,0 +1,120 @@
+# Envoy Sidecar for Hydra
+# - Listener on port 10000
+# - Static Clusters to local sidecar HTTP ports 4444 and 4445
+# - Route whitelist of admin endpoints to Hydra admin port 4445
+# - Route everything else to Hydra public port 4444
+# https://www.ory.sh/docs/next/hydra/production
+---
+admin:
+  access_log_path: /dev/stdout
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+node:
+  cluster: ${SERVICE}
+  id: ${HOSTNAME}
+
+static_resources:
+  clusters:
+    - connect_timeout: 0.250s
+      load_assignment:
+        cluster_name: local_public
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: local
+                      port_value: 4444  # HTTP/1 public server port
+      name: local_public
+      type: STRICT_DNS
+
+    - connect_timeout: 0.250s
+      load_assignment:
+        cluster_name: local_admin
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: local
+                      port_value: 4445  # HTTP/1 admin server port
+      name: local_admin
+      type: STRICT_DNS
+
+  listeners:
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - filters:
+            - config:
+                access_log:
+                  - config:
+                      format: >
+                        listener=ingress start_time=%START_TIME%
+                        req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
+                        response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
+                        bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                        resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
+                        req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
+                        req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)% req_uber_trace_id=%REQ(UBER-TRACE-ID)%
+                        req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
+                        resp_grpc_status=%RESP(grpc-status)% resp_grpc_message="%RESP(grpc-message)%"
+                        trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
+                      path: /dev/stdout
+                    name: envoy.file_access_log
+
+                http_filters:
+                  - name: envoy.grpc_http1_bridge
+                  - name: envoy.grpc_web
+                  - name: envoy.router
+
+                route_config:
+                  name: local
+                  virtual_hosts:
+                    - domains:
+                        - '*'
+                      name: local
+                      routes:
+                        - match:
+                            path: /clients
+                          route:
+                            cluster: local_admin
+                        - match:
+                            path: /oauth2/introspect
+                          route:
+                            cluster: local_admin
+                        - match:
+                            prefix: /
+                          route:
+                            cluster: local_public
+
+                stat_prefix: ingress_http
+                tracing:
+                  operation_name: ingress
+              name: envoy.http_connection_manager
+      name: ingress
+
+tracing:
+  http:
+    config:
+      config:
+        baggage_restrictions:
+          denyBaggageOnInitializationFailure: false
+          hostPort: ""
+        headers:
+          jaegerBaggageHeader: jaeger-baggage
+          jaegerDebugHeader: jaeger-debug-id
+          traceBaggageHeaderPrefix: uberctx-
+        reporter:
+          localAgentHostPort: jaeger:6831
+        sampler:
+          param: 1
+          type: const
+        service_name: ${SERVICE}
+      library: /usr/local/lib/libjaegertracing_plugin.so
+    name: envoy.dynamic.ot

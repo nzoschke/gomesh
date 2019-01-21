@@ -8,39 +8,139 @@ option java_outer_classname = "UsersProto";
 option java_package = "com.gomesh.users.v2";
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
-import "widgets/v1/widgets.proto";
+import "widgets/v2/widgets.proto";
 
 service Users {
+  // Get User
+  //
+  // Takes parent Org in path
   rpc Get(GetRequest) returns (User) {
     option (google.api.http) = {
-      get: "/v2/users/{name=*}"
+      get: "/v2/{name=orgs/*/users/*}"
     };
   }
-  rpc Create(CreateRequest) returns (User);
+  // Create User
+  //
+  // Takes parent Org in path and User in body
+  rpc Create(CreateRequest) returns (User) {
+    option (google.api.http) = {
+      post: "/v2/{parent=orgs/*}/users"
+      body: "*"
+    };
+  }
+  // Update User
+  //
+  // Takes User name (with parent Org) in path, and User in body
+  rpc Update(UpdateRequest) returns (User) {
+    option (google.api.http) = {
+      patch: "/v2/{user.name=orgs/*/users/*}"
+      body: "*"
+    };
+  }
+  // Delete User
+  //
+  // Takes User name (with parent Org) in path
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v2/{name=orgs/*/users/*}"
+    };
+  }
+  // List Users
+  //
+  // Takes parent Org in path
+  rpc List(ListRequest) returns (ListResponse) {
+    option (google.api.http) = {
+      get: "/v2/{parent=orgs/*}/users"
+    };
+  }
+  // BatchGet Users
+  //
+  // Takes parent Org in path and User names in query string
+  rpc BatchGet(BatchGetRequest) returns (BatchGetResponse) {
+    option (google.api.http) = {
+      get: "/v2/{parent=orgs/*}/users:batchGet"
+    };
+  }
 }
 
 message User {
-  string id = 1;
-  string parent = 2;
-  string name = 3;
-  string display_name = 4;
-  google.protobuf.Timestamp create_time = 5;
-  repeated gomesh.widgets.v1.Widget widgets = 6;
+  string parent = 1;
+  string name = 2; // Output only
+  string display_name = 3;
+  google.protobuf.Timestamp create_time = 4; // Output only
+  repeated gomesh.widgets.v2.Widget widgets = 5;
 }
 
 message GetRequest {
+  // Name
+  //
+  // Format "orgs/{org_id}/users/{user_id}"
   string name = 1 [
     (validate.rules).string = {
-      pattern: "^[a-z]+$"
-      min_len: 2
-      max_len: 64
+      pattern: "^orgs/[a-z0-9._-]+/users/[a-z0-9._-]+$"
+      max_bytes: 512
     }
   ];
 }
 
 message CreateRequest {
+  // Parent
+  //
+  // Format "orgs/{org_id}"
+  string parent = 1 [
+    (validate.rules).string = {
+      pattern: "^orgs/[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
+  // User ID
+  string user_id = 2 [
+    (validate.rules).string = {
+      pattern: "^[a-z0-9._-]+$"
+      max_bytes: 512
+    }
+  ];
+  // User
+  //
+  // Required
+  User user = 3 [(validate.rules).message.required = true];
+}
+
+message UpdateRequest {
+  // User
+  //
+  // Required
+  User user = 1 [(validate.rules).message.required = true];
+  // Update Mask
+  //
+  // Required
+  google.protobuf.FieldMask update_mask = 2 [(validate.rules).message.required = true];
+}
+
+message DeleteRequest {
+  string name = 1;
+}
+
+message ListRequest {
   string parent = 1;
-  User user = 2;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+}
+
+message BatchGetRequest {
+  string parent = 1;
+  repeated string names = 2;
+}
+
+message BatchGetResponse {
+  repeated User users = 1;
 }

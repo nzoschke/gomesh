@@ -10,16 +10,17 @@ option java_package = "com.gomesh.users.v1";
 import "google/protobuf/timestamp.proto";
 
 service Users {
+  // Get a user by name
   rpc Get(GetRequest) returns (User);
+  // Create a user by parent org and user-supplied id
   rpc Create(CreateRequest) returns (User);
 }
 
 message User {
-  string id = 1;
-  string parent = 2;
-  string name = 3;
-  string display_name = 4;
-  google.protobuf.Timestamp create_time = 5;
+  string parent = 1;
+  string name = 2;
+  string display_name = 3;
+  google.protobuf.Timestamp create_time = 4;
 }
 
 message GetRequest {
@@ -28,5 +29,6 @@ message GetRequest {
 
 message CreateRequest {
   string parent = 1;
-  User user = 2;
+  string user_id = 2;
+  User user = 3;
 }

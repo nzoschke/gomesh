@@ -1,0 +1,156 @@
+# Envoy API Gateway
+# - Dynamic Cluster Discovery
+# - Listener on port 10000
+# - Filter for JSON -> gRPC transcoding
+# - Routes to gRPC clusters based on path
+# Use `envoy.sh` to template SERVICE and HOSTNAME
+---
+admin:
+  access_log_path: /dev/stdout
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
+
+dynamic_resources:
+  cds_config:
+    api_config_source:
+      api_type: GRPC
+      grpc_services:
+        envoy_grpc:
+          cluster_name: xds
+
+node:
+  cluster: ${SERVICE}
+  id: ${HOSTNAME}
+
+static_resources:
+  clusters:
+    - connect_timeout: 1s
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: xds
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: xds-sidecar
+                      port_value: 10000
+      name: xds
+      type: STRICT_DNS
+
+  listeners:
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - filters:
+            - config:
+                access_log:
+                  - config:
+                      format: >
+                        listener=ingress start_time=%START_TIME%
+                        req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
+                        response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
+                        bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                        resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
+                        req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
+                        req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)%
+                        req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
+                        resp_grpc_status=%RESP(grpc-status) %resp_grpc_message="%RESP(grpc-message)%"
+                        trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
+                      path: /dev/stdout
+                    name: envoy.file_access_log
+                http_filters:
+                  - config:
+                      domain: gateway
+                      failure_mode_deny: true
+                      rate_limit_service:
+                        grpc_service:
+                          envoy_grpc:
+                            cluster_name: ratelimit-sidecar
+                      timeout: 0.5s
+                    name: envoy.rate_limit
+                  - config:
+                      failure_mode_allow: false
+                      grpc_service:
+                        envoy_grpc:
+                          cluster_name: auth-v2alpha-sidecar
+                    name: envoy.ext_authz
+                  - name: envoy.grpc_web
+                  - config:
+                      print_options:
+                        add_whitespace: true
+                        always_print_primitive_fields: true
+                        preserve_proto_field_names: true
+                      proto_descriptor: /etc/pb/users/v2/v2.pb
+                      services:
+                        - gomesh.users.v2.Users
+                    name: envoy.grpc_json_transcoder
+                  - config:
+                      print_options:
+                        add_whitespace: true
+                        always_print_primitive_fields: true
+                        preserve_proto_field_names: true
+                      proto_descriptor: /etc/pb/widgets/v2/v2.pb
+                      services:
+                        - gomesh.widgets.v2.Widgets
+                    name: envoy.grpc_json_transcoder
+                  - name: envoy.router
+                route_config:
+                  name: local
+                  validate_clusters: false  # defer to CDS
+                  virtual_hosts:
+                    - domains:
+                        - '*'
+                      name: local
+                      rate_limits:
+                        - actions:
+                            - remote_address: {}
+                      routes:
+                        - match:
+                            path: /oauth2/auth
+                          per_filter_config:
+                            envoy.ext_authz:
+                              disabled: true
+                          route:
+                            cluster: hydra-sidecar
+                        - match:
+                            prefix: /gomesh.users.v2.Users
+                          route:
+                            cluster: users-v2-sidecar
+                        - match:
+                            prefix: /gomesh.widgets.v2.Widgets
+                          route:
+                            cluster: widgets-v2-sidecar
+                        - match:
+                            prefix: /
+                          route:
+                            cluster: users-v2-sidecar
+                stat_prefix: ingress_http
+                tracing:
+                  operation_name: ingress
+              name: envoy.http_connection_manager
+      name: ingress
+
+tracing:
+  http:
+    config:
+      config:
+        baggage_restrictions:
+          denyBaggageOnInitializationFailure: false
+          hostPort: ""
+        headers:
+          jaegerBaggageHeader: jaeger-baggage
+          jaegerDebugHeader: jaeger-debug-id
+          traceBaggageHeaderPrefix: uberctx-
+        reporter:
+          localAgentHostPort: jaeger:6831
+        sampler:
+          param: 1
+          type: const
+        service_name: ${SERVICE}
+      library: /usr/local/lib/libjaegertracing_plugin.so
+    name: envoy.dynamic.ot

@@ -1,38 +1,77 @@
+# This demonstrates an envoy service mesh with sidecars, service discovery, and routing by authority header
+# It exposes all ports for direct introspection
 ---
-version: "3"
 services:
   users-v2:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["users-v2", "-w", "0.0.0.0:11000"]  # use envoy egress
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
+    command: [
+      "users-v2",
+      "-wh", "users-v2-sidecar:11000",  # use users sidecar egress
+      "-wa", "widgets-v2-sidecar",      # route to widgets sidecar cluster
+    ]
     ports:
-      - "80:10000"   # map envoy ingress
-      - "9901:9901"  # map envoy admin
+      - "8000:8000"  # map gRPC server
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
 
-  widgets-v1:
+  users-v2-sidecar:
     build:
-      context: ../..
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar-xds.yaml", "users-v2"]
+    links:
+      - users-v2:local
+    ports:
+      - "9900:9901"    # map envoy admin
+      - "10000:10000"  # map envoy ingress
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+  widgets-v2:
+    build:
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["widgets-v1"]
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar-xds.yaml
-
-  prometheus:
-    build:
-      context: ../..
-      dockerfile: config/docker/Dockerfile-prometheus
+    command: ["widgets-v2", "-p", "8000"]
     ports:
-      - "9090:9090"
+      - "8001:8000"  # map gRPC server
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  widgets-v2-sidecar:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar-xds.yaml", "widgets-v2"]
+    links:
+      - widgets-v2:local
+    ports:
+      - "9901:9901"    # map envoy admin
+      - "10001:10000"  # map envoy ingress
+    volumes:
+      - ./config/envoy:/etc/envoy
 
   xds:
     build:
-      context: ../..
+      context: .
       dockerfile: config/docker/Dockerfile
-    command: ["xds-docker"]
-    environment:
-      - ENVOY_CONFIG=/etc/envoy/sidecar.yaml
+    command: xds-docker
+    ports:
+      - "8002:8000"  # map gRPC server
     volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  xds-sidecar:
+    command: ["sh", "-c", "envoy -c /etc/envoy/sidecar-static.yaml --service-node $$HOSTNAME --service-cluster xds"]
+    image: envoyproxy/envoy:v1.9.0
+    links:
+      - xds:local
+    ports:
+      - "9902:9901"    # map envoy admin
+      - "10002:10000"  # map envoy ingress
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+version: "3"

@@ -1,11 +1,13 @@
 #!/bin/bash
-set -ex -o pipefail
+set -ex
 
-ENVOY_CLUSTER=${ENVOY_CLUSTER:-$1}
-ENVOY_CONFIG=${ENVOY_CONFIG:-/etc/envoy/envoy.yaml}
+CONFIG=${1:-/etc/envoy/envoy.yaml}
+SERVICE=${2:-$HOSTNAME}
 
-# run CMD in background
-"$@" &
+# template config file
+sed                                \
+    -e "s/\${HOSTNAME}/$HOSTNAME/" \
+    -e "s/\${SERVICE}/$SERVICE/"   \
+    $CONFIG > /tmp/envoy.yaml
 
-# run envoy in foreground
-envoy $ENVOY_OPTS -c $ENVOY_CONFIG --service-node $HOSTNAME --service-cluster $ENVOY_CLUSTER
+exec envoy -c /tmp/envoy.yaml
