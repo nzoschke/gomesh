@@ -13,7 +13,6 @@ workflow "yaml" {
   resolves = ["yamllint"]
 }
 
-
 action "golint" {
   uses = "./.github/action/go"
   runs = ".github/golint.sh"
