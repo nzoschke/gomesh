@@ -3,9 +3,9 @@ package auth
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
-	"math/rand"
 
 	"github.com/avast/retry-go"
 	"github.com/nzoschke/gomesh/internal/metadata"
