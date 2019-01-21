@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/satori/go.uuid"
-
 	"github.com/golang/protobuf/ptypes"
 	users "github.com/nzoschke/gomesh-interface/gen/go/users/v1"
 	"google.golang.org/grpc"
@@ -43,7 +41,6 @@ func (s *Server) Create(ctx context.Context, in *users.CreateRequest) (*users.Us
 	return &users.User{
 		CreateTime:  ptypes.TimestampNow(),
 		DisplayName: in.User.DisplayName,
-		Id:          uuid.NewV4().String(),
 		Name:        fmt.Sprintf("users/%s", in.UserId),
 		Parent:      in.Parent,
 	}, nil

@@ -6,15 +6,11 @@ import (
 	"fmt"
 	"strings"
 
-	"net/http"
-
 	"github.com/envoyproxy/go-control-plane/envoy/api/v2/core"
 	auth "github.com/envoyproxy/go-control-plane/envoy/service/auth/v2alpha"
 	"github.com/envoyproxy/go-control-plane/envoy/type"
 	"github.com/gogo/googleapis/google/rpc"
 	"github.com/gogo/protobuf/types"
-	"github.com/nzoschke/gomesh/internal/metadata"
-	"github.com/ory/hydra/sdk/go/hydra"
 )
 
 // Interface assertion
@@ -22,28 +18,7 @@ var _ auth.AuthorizationServer = (*Server)(nil)
 
 // Server implements the auth/v2alpha interface
 type Server struct {
-	Hydra     *hydra.CodeGenSDK
-	Transport *Transport
-}
-
-// Transport adds host and trace headers to requests
-type Transport struct {
-	Authority string
-	TraceID   string
-	Transport *http.Transport
-}
-
-// RoundTrip implements the RoundTripper interface
-// It rewrites the host for envoy forwarding
-// Andy hackily sets a trace id
-func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Host = t.Authority
-
-	req.Header.Add("uber-trace-id", t.TraceID)
-	resp, err := t.Transport.RoundTrip(req)
-	t.TraceID = ""
-
-	return resp, err
+	HydraConfig *HydraConfiguration
 }
 
 // Check does an auth header check and returns a 200 on auth, non-200 otherwise
@@ -82,10 +57,12 @@ func basicValidate(username, password string) bool {
 }
 
 func (s *Server) bearerCheck(ctx context.Context, token string) (*auth.CheckResponse, error) {
-	tid, _ := metadata.Get(ctx, "uber-trace-id")
-	s.Transport.TraceID = tid
+	h, err := NewHydraSDK(ctx, s.HydraConfig)
+	if err != nil {
+		return responseDenied(err.Error(), int(envoy_type.StatusCode_Unauthorized))
+	}
 
-	i, _, err := s.Hydra.IntrospectOAuth2Token(token, "")
+	i, _, err := h.IntrospectOAuth2Token(token, "")
 	if err != nil {
 		return responseDenied(err.Error(), int(envoy_type.StatusCode_Unauthorized))
 	}

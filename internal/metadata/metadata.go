@@ -22,6 +22,20 @@ func Get(ctx context.Context, key string) (string, bool) {
 	return vs[0], true
 }
 
+// Set appends a metadata value to the incoming context
+func Set(ctx context.Context, key, value string) (context.Context, bool) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		md := metadata.New(map[string]string{
+			key: value,
+		})
+		return metadata.NewIncomingContext(ctx, md), true
+	}
+
+	md.Append(key, value)
+	return metadata.NewIncomingContext(ctx, md), true
+}
+
 // TraceIDForwarder forwards `uber-trace-id` value from incoming to outgoing context metadata
 func TraceIDForwarder() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
