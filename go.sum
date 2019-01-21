@@ -100,6 +100,8 @@ github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwd
 github.com/moul/http2curl v0.0.0-20170919181001-9ac6cf4d929b/go.mod h1:8UbvGypXm98wA/IqH45anm5Y2Z6ep6O31QGOAZ3H0fQ=
 github.com/nzoschke/gomesh-interface v0.0.0-20190105205516-47a6d4f9ad23 h1:r3qShjexfFdUdDv7xMHxI0m/Zhn2rQR4VeXl52ilVvs=
 github.com/nzoschke/gomesh-interface v0.0.0-20190105205516-47a6d4f9ad23/go.mod h1:iwntgU145wr9V9/oZAwELHA5os953F72c6LsLTEIoPI=
+github.com/nzoschke/gomesh-interface v0.0.0-20190119185404-022197c7247a h1:Sf9kevMNLnbLExUAJ3VQlLKDp9kOlAwq+qYY9CrS5VA=
+github.com/nzoschke/gomesh-interface v0.0.0-20190119185404-022197c7247a/go.mod h1:iwntgU145wr9V9/oZAwELHA5os953F72c6LsLTEIoPI=
 github.com/oleiade/reflections v1.0.0/go.mod h1:RbATFBbKYkVdqmSFtx13Bb/tVhR0lgOBXunWTZKeL4w=
 github.com/opencontainers/go-digest v1.0.0-rc1 h1:WzifXhOVOEOuFYOJAW6aQqW0TooG2iki3E3Ii+WN7gQ=
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=

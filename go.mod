@@ -11,9 +11,9 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
 	github.com/grpc-ecosystem/grpc-gateway v1.6.4
 	github.com/lyft/protoc-gen-validate v0.0.12 // indirect
-	github.com/nzoschke/gomesh-interface v0.0.0-20190105205516-47a6d4f9ad23
+	github.com/nzoschke/gomesh-interface v0.0.0-20190119185404-022197c7247a
 	github.com/ory/hydra v0.0.0-20181218121201-bdb6634e3d87
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/satori/go.uuid v1.2.0
 	github.com/segmentio/conf v1.0.0
 	github.com/segmentio/go-snakecase v1.1.0 // indirect
