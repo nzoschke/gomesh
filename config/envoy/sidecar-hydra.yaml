@@ -58,7 +58,7 @@ static_resources:
                         listener=ingress start_time=%START_TIME%
                         req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
                         response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
-                        bytes_reveived=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
+                        bytes_received=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
                         resp_x_envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%
                         req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
                         req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)% req_uber_trace_id=%REQ(UBER-TRACE-ID)%
