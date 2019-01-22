@@ -6,6 +6,7 @@ go version
 diff -u <(echo -n) <(gofmt -d ./) || STATUS=$?
 golint ./...   || STATUS=$?
 go vet ./...   || STATUS=$?
-go build ./... || status=$?
+go build ./... || STATUS=$?
+go test ./...  || STATUS=$?
 
 exit $STATUS

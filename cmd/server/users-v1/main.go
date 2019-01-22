@@ -38,10 +38,14 @@ type Server struct{}
 
 // Create creates a User
 func (s *Server) Create(ctx context.Context, in *users.CreateRequest) (*users.User, error) {
+	if in.GetUser() == nil {
+		return nil, status.Error(codes.InvalidArgument, "User is required")
+	}
+
 	return &users.User{
 		CreateTime:  ptypes.TimestampNow(),
 		DisplayName: in.User.DisplayName,
-		Name:        fmt.Sprintf("users/%s", in.UserId),
+		Name:        in.User.Name,
 		Parent:      in.Parent,
 	}, nil
 }
