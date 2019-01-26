@@ -12,7 +12,7 @@ services:
       "-wa", "widgets-v2-sidecar",      # route to widgets sidecar cluster
     ]
     ports:
-      - "8000:8000"  # map gRPC server
+      - "8002:8002"  # map gRPC server
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
@@ -33,9 +33,9 @@ services:
     build:
       context: .
       dockerfile: config/docker/Dockerfile
-    command: ["widgets-v2", "-p", "8000"]
+    command: ["widgets-v2"]
     ports:
-      - "8001:8000"  # map gRPC server
+      - "8012:8002"  # map gRPC server
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
@@ -47,8 +47,8 @@ services:
     links:
       - widgets-v2:local
     ports:
-      - "9901:9901"    # map envoy admin
-      - "10001:10000"  # map envoy ingress
+      - "9911:9901"    # map envoy admin
+      - "10010:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
 
@@ -58,7 +58,7 @@ services:
       dockerfile: config/docker/Dockerfile
     command: xds-docker
     ports:
-      - "8002:8000"  # map gRPC server
+      - "8022:8002"  # map gRPC server
     volumes:
       - ./bin/linux_amd64/server:/usr/local/sbin
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -69,8 +69,8 @@ services:
     links:
       - xds:local
     ports:
-      - "9902:9901"    # map envoy admin
-      - "10002:10000"  # map envoy ingress
+      - "9921:9901"    # map envoy admin
+      - "10020:10000"  # map envoy ingress
     volumes:
       - ./config/envoy:/etc/envoy
 
