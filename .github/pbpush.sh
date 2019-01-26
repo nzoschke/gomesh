@@ -19,6 +19,7 @@ mockery -all -dir gen -inpkg  || STATUS=$?
 
 # sync gen, proto, proto_ext folders
 git clone https://nzoschke:${PUSH_TOKEN}@github.com/nzoschke/gomesh-interface.git && cd gomesh-interface
+git checkout -b ${GITHUB_REF}
 git rm -r gen proto proto_ext
 cp -r ../gen ../proto ../proto_ext .
 git add -f .
@@ -30,4 +31,4 @@ git add -f .
 git config user.email "gen@example.com"
 git config user.name  "gen"
 git commit -m "$MSG"
-git push origin HEAD:${GITHUB_REF}
+git push origin ${GITHUB_REF}
