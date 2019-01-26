@@ -30,4 +30,4 @@ git add -f .
 git config user.email "gen@example.com"
 git config user.name  "gen"
 git commit -m "$MSG"
-git push -f origin HEAD:${GITHUB_REF}
+git push origin HEAD:${GITHUB_REF}
