@@ -129,7 +129,7 @@ static_resources:
                 access_log:
                   - config:
                       format: >
-                        listener=egress start_time=%START_TIME%
+                        listener=egress  start_time=%START_TIME%
                         req_method=%REQ(:METHOD)% req_path=%REQ(:PATH)% protocol=%PROTOCOL%
                         response_code=%RESPONSE_CODE% response_flags=%RESPONSE_FLAGS%
                         bytes_received=%BYTES_RECEIVED% bytes_sent=%BYTES_SENT% duration=%DURATION%
@@ -137,7 +137,7 @@ static_resources:
                         req_x_envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH)% req_x_forwarded_for=%REQ(X-FORWARDED-FOR)%
                         req_user_agent="%REQ(USER-AGENT)%" req_x_request_id=%REQ(X-REQUEST-ID)% req_uber_trace_id=%REQ(UBER-TRACE-ID)%
                         req_authority=%REQ(:AUTHORITY)% upstream_host=%UPSTREAM_HOST% upstream_cluster=%UPSTREAM_CLUSTER%
-                        resp_grpc_status=%RESP(grpc-status) %resp_grpc_message="%RESP(grpc-message)%"
+                        resp_grpc_status=%RESP(grpc-status)% resp_grpc_message="%RESP(grpc-message)%"
                         trailer_grpc_status=%TRAILER(grpc-status)% trailer_grpc_message="%TRAILER(grpc-message)%"
                       path: /dev/stdout
                     name: envoy.file_access_log
