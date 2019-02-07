@@ -8,7 +8,7 @@ descriptors:
 
   - key: remote_address
     rate_limit:
-      requests_per_unit: 60
-      unit: minute
+      requests_per_unit: 25
+      unit: second
 
 domain: gateway

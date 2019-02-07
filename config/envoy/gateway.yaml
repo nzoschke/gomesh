@@ -78,6 +78,7 @@ static_resources:
                       grpc_service:
                         envoy_grpc:
                           cluster_name: auth-v2alpha-sidecar
+                        timeout: 0.5s
                     name: envoy.ext_authz
                   - name: envoy.grpc_web
                   - config:
@@ -98,6 +99,7 @@ static_resources:
                       services:
                         - gomesh.widgets.v2.Widgets
                     name: envoy.grpc_json_transcoder
+                  - name: envoy.grpc_http1_bridge
                   - name: envoy.router
                 route_config:
                   name: local
@@ -134,6 +136,17 @@ static_resources:
                   operation_name: ingress
               name: envoy.http_connection_manager
       name: ingress
+
+stats_config:
+  stats_tags:
+    - regex: '^cluster(?=\.).*?\.grpc(-(.*?))\.'                          # web
+      tag_name: envoy.grpc_format
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((.*)\.(?:.*)\.)'         # myservice.widgets.v0.Widgets (greedy)
+      tag_name: envoy.grpc_service
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?\.((?:.*)\.(.*)\.)'         # Get
+      tag_name: envoy.grpc_method
+    - regex: '^cluster(?=\.).*?\.grpc(?:-web)?(\.(?:.*)\.(?:.*)\.(\d+))'  # 0 (and remove leading dot)
+      tag_name: envoy.grpc_code
 
 tracing:
   http:

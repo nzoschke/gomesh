@@ -7,6 +7,9 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+// IDHeaders are request headers that should be forwarded for correlating logs or traces
+var IDHeaders = []string{"uber-trace-id", "x-request-id"}
+
 // Get gets a metadata value from incoming context
 func Get(ctx context.Context, key string) (string, bool) {
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -36,12 +39,14 @@ func Set(ctx context.Context, key, value string) (context.Context, bool) {
 	return metadata.NewIncomingContext(ctx, md), true
 }
 
-// TraceIDForwarder forwards `uber-trace-id` value from incoming to outgoing context metadata
+// TraceIDForwarder forwards `uber-trace-id` and `x-request-id` values from incoming to outgoing context metadata
 func TraceIDForwarder() grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		if md, ok := metadata.FromIncomingContext(ctx); ok {
-			for _, v := range md.Get("uber-trace-id") {
-				ctx = metadata.AppendToOutgoingContext(ctx, "uber-trace-id", v)
+			for _, k := range IDHeaders {
+				for _, v := range md.Get(k) {
+					ctx = metadata.AppendToOutgoingContext(ctx, k, v)
+				}
 			}
 		}
 		return invoker(ctx, method, req, reply, cc, opts...)

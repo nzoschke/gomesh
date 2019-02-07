@@ -29,6 +29,9 @@ func (s *Server) Check(ctx context.Context, in *auth.CheckRequest) (*auth.CheckR
 	}
 
 	auth := strings.SplitN(h, " ", 2)
+	if len(auth) != 2 {
+		return responseDenied("Invalid auth header", int(envoy_type.StatusCode_Unauthorized))
+	}
 
 	switch auth[0] {
 	case "Basic":

@@ -29,6 +29,7 @@ type HydraConfiguration struct {
 // Transport adds host and trace headers to requests
 type Transport struct {
 	Authority string
+	RequestID string
 	TraceID   string
 }
 
@@ -36,6 +37,7 @@ type Transport struct {
 // It rewrites the host for Envoy forwarding and propogates a trace ID
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add("uber-trace-id", t.TraceID)
+	req.Header.Add("x-request-id", t.RequestID)
 	req.Host = t.Authority
 	return http.DefaultTransport.RoundTrip(req)
 }
@@ -60,9 +62,11 @@ func NewHydraSDK(ctx context.Context, config *HydraConfiguration) (*hydra.CodeGe
 	}
 
 	// custom transport for hydra SDK requests
+	rid, _ := metadata.Get(ctx, "x-request-id")
 	tid, _ := metadata.Get(ctx, "uber-trace-id")
 	sdk.AdminApi.Configuration.Transport = &Transport{
 		Authority: config.Authority,
+		RequestID: rid,
 		TraceID:   tid,
 	}
 

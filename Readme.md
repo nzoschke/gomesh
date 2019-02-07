@@ -47,11 +47,10 @@ It demonstrates:
 
 ## Quick Start
 
-This project spans three repositories to isolate API design and definitions from generated code from service implementations.
+This project spans two repositories to isolate generated code from service definitions and implementations.
 
-1. ([gomesh-proto](https://github.com/nzoschke/gomesh-proto)) for .proto definitions
-2. ([gomesh-interface](https://github.com/nzoschke/gomesh-interface)) for generated Go client and server interfaces
-3. ([gomesh](https://github.com/nzoschke/gomesh)) for gRPC service implementations
+1. ([gomesh-interface](https://github.com/nzoschke/gomesh-interface)) for generated Go client and server interfaces
+2. ([gomesh](https://github.com/nzoschke/gomesh)) for .proto definitions and gRPC service implementations
 
 This project uses:
 
@@ -224,7 +223,7 @@ You can auth with any username:password, or you can find an OAuth token in the l
 
 ```
 $ docker logs --since 5m gomesh_auth-v2alpha_1 2>&1 | grep TOKEN
-msg="createDemoToken TOKEN=SJKzza_KuMfEDHfz8JsNyH-W9zZV9YQZhRVZPhHZNew.b3IxgJxzIqJl1vkQmtm8Qu6juQ8bRbbJW7kcbenTQAs"
+CreateToken TOKEN=sxhmAdIuo_sVeNk0UQhkCeZeCp7u-FiFJelg40eEnF4.5vBxqCQegt9Eg-ITQsrnla_KZf1GvMrOAOS_a-qm_qg
 ```
 
 ```shell

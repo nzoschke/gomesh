@@ -1,0 +1,26 @@
+# This demonstrates a gRPC service and Envoy sidecar
+# It exposes all ports for direct introspection
+---
+services:
+  users-v1:
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile
+    command: users-v1
+    ports:
+      - "8002:8002"  # map gRPC server
+    volumes:
+      - ./bin/linux_amd64/server:/usr/local/sbin
+
+  users-v1-sidecar:
+    dockerfile: config/docker/Dockerfile-envoy
+    command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "users-v1"]
+    links:
+      - users-v1:local
+    ports:
+      - "9901:9901"    # map envoy admin
+      - "10000:10000"  # map envoy ingress
+    volumes:
+      - ./config/envoy:/etc/envoy
+
+version: "3"

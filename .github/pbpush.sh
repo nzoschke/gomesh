@@ -8,9 +8,11 @@ STATUS=0
 prototool lint      proto     || STATUS=$?
 prototool format -l proto     || STATUS=$?
 
-# generate protos and mocks
+# generate protos
 prototool generate  proto     || STATUS=$?
 prototool generate  proto_ext || STATUS=$?
+
+# generate mocks
 find gen -name 'mock_*.go' -delete
 mockery -all -dir gen -inpkg  || STATUS=$?
 
