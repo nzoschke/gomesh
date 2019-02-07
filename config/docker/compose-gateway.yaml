@@ -85,7 +85,7 @@ services:
       dockerfile: config/docker/Dockerfile-ratelimit
     environment:
       - USE_STATSD=false
-      - LOG_LEVEL=INFO # DEBUG shows rate limit counters
+      - LOG_LEVEL=INFO  # DEBUG shows rate limit counters
       - REDIS_SOCKET_TYPE=tcp
       - REDIS_URL=redis:6379
       - RUNTIME_ROOT=/etc

@@ -13,8 +13,8 @@ services:
       - ./bin/linux_amd64/server:/usr/local/sbin
 
   users-v1-sidecar:
-    dockerfile: config/docker/Dockerfile-envoy
     command: ["envoy.sh", "/etc/envoy/sidecar.yaml", "users-v1"]
+    dockerfile: config/docker/Dockerfile-envoy
     links:
       - users-v1:local
     ports:
